@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Para Mary",
+    "slug": "mary-love-notifications",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0D0008",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.felpoinho.paramary",
+      "infoPlist": {
+        "NSUserNotificationsUsageDescription": "Receba mensagens de amor ao longo do dia 💕",
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.felpoinho.paramary",
+      "adaptiveIcon": {
+        "backgroundColor": "#0D0008"
+      },
+      "permissions": [
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#C0395A",
+          "sounds": [],
+          "iosDisplayInForeground": true
+        }
+      ],
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9eed06df-9cb0-4b81-b7c0-6f3c739f097a"
+      }
+    }
+  }
+}
