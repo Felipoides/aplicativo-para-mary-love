@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
       "backgroundColor": "#0D0008",
       "resizeMode": "contain"
     },
@@ -14,9 +16,6 @@
       "bundleIdentifier": "com.felpoinho.paramary",
       "infoPlist": {
         "NSUserNotificationsUsageDescription": "Receba mensagens de amor ao longo do dia 💕",
-        "UIBackgroundModes": [
-          "remote-notification"
-        ],
         "ITSAppUsesNonExemptEncryption": false
       },
       "config": {
@@ -26,6 +25,7 @@
     "android": {
       "package": "com.felpoinho.paramary",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0D0008"
       },
       "permissions": [
@@ -39,12 +39,9 @@
         {
           "icon": "./assets/notification-icon.png",
           "color": "#C0395A",
-          "sounds": [],
           "iosDisplayInForeground": true
         }
-      ],
-      "expo-asset",
-      "expo-font"
+      ]
     ],
     "extra": {
       "eas": {
