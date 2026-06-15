@@ -63,15 +63,26 @@ export const getOpenCount = async () => {
 export const getTodaySurprise = async () => {
   const today = new Date().toDateString();
   const lastDate = await AsyncStorage.getItem('surprise_date');
+
+  // Usa lista remota se disponível, senão usa padrão
+  let pool = SURPRISES;
+  try {
+    const raw = await AsyncStorage.getItem('remote_surprises');
+    if (raw) {
+      const remote = JSON.parse(raw);
+      if (Array.isArray(remote) && remote.length > 0) pool = remote;
+    }
+  } catch (_) {}
+
   let idx = parseInt((await AsyncStorage.getItem('surprise_index')) || '0');
 
   if (lastDate !== today) {
-    idx = (idx + 1) % SURPRISES.length;
+    idx = (idx + 1) % pool.length;
     await AsyncStorage.setItem('surprise_date', today);
     await AsyncStorage.setItem('surprise_index', String(idx));
   }
 
-  return SURPRISES[idx];
+  return pool[idx % pool.length];
 };
 
 export const getTheme = async () =>

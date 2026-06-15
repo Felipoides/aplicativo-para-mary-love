@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💖 Painel Mary</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0A0515, #1A0A20, #2C1654, #3D1021);
+      min-height: 100vh; color: #FFD6E4; padding: 20px;
+    }
+    .container { max-width: 540px; margin: 0 auto; }
+    h1 { font-size: 26px; font-weight: 900; color: #FFD700; text-align: center; margin-bottom: 4px; }
+    .subtitle { text-align: center; color: rgba(255,182,193,0.7); font-size: 13px; margin-bottom: 28px; }
+    .card {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,182,193,0.15);
+      border-radius: 16px; padding: 20px; margin-bottom: 16px;
+    }
+    .card h2 { font-size: 15px; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    label { font-size: 12px; color: rgba(255,182,193,0.7); display: block; margin-bottom: 6px; margin-top: 10px; }
+    select, input, textarea {
+      width: 100%; padding: 10px 14px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.25);
+      border-radius: 10px; color: #FFFFFF; font-size: 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus, textarea:focus { border-color: #C0395A; }
+    select option { background: #1A0A20; }
+    textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+    .btn {
+      display: block; width: 100%; padding: 12px;
+      border: none; border-radius: 12px; cursor: pointer;
+      font-size: 14px; font-weight: 800; color: #FFF;
+      margin-top: 12px; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: linear-gradient(90deg, #C0395A, #E8527A); }
+    .btn-gold { background: linear-gradient(90deg, #D4AF37, #FFD700); color: #1A0A20; }
+    .btn-danger { background: rgba(192,57,90,0.2); border: 1px solid rgba(192,57,90,0.5); color: #FF8080; }
+    .btn-clear { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,100,100,0.3); color: #FF8080; }
+    .btn-sm {
+      display: inline-block; width: auto; padding: 6px 14px;
+      font-size: 12px; margin-top: 0; border-radius: 8px;
+    }
+    .item-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .item {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 12px;
+    }
+    .item-text { flex: 1; font-size: 13px; color: #FFD6E4; line-height: 1.5; }
+    .item-meta { font-size: 11px; color: rgba(255,182,193,0.5); margin-top: 2px; }
+    .del { background: rgba(192,57,90,0.3); border: none; border-radius: 7px;
+      color: #FF6B8A; font-size: 12px; font-weight: 700;
+      width: 28px; height: 28px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+    .status {
+      font-size: 13px; margin-top: 10px; padding: 8px 12px;
+      border-radius: 8px; display: none; text-align: center;
+    }
+    .status.ok { background: rgba(50,200,100,0.15); color: #6EE7A0; display: block; }
+    .status.err { background: rgba(200,50,50,0.15); color: #FF8080; display: block; }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 20px;
+      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      margin-right: 4px;
+    }
+    .badge-frase { background: rgba(192,57,90,0.3); color: #FF8FAF; }
+    .badge-desafio { background: rgba(212,175,55,0.3); color: #FFD700; }
+    .badge-segredo { background: rgba(92,26,53,0.5); color: #DDA0DD; }
+    .badge-memoria { background: rgba(26,107,74,0.3); color: #5EC89A; }
+    .badge-motivacao { background: rgba(30,100,180,0.3); color: #7EC8FF; }
+    .special-preview {
+      margin-top: 12px; padding: 14px; border-radius: 12px;
+      background: rgba(192,57,90,0.1); border: 1px solid rgba(192,57,90,0.3);
+      display: none;
+    }
+    .special-preview.visible { display: block; }
+    .special-preview p { font-size: 13px; color: rgba(255,200,220,0.9); line-height: 1.6; font-style: italic; }
+    .special-preview strong { color: #FFD700; font-style: normal; }
+    .hint { font-size: 11px; color: rgba(255,182,193,0.5); font-style: italic; margin-top: 6px; }
+    .row { display: flex; gap: 8px; }
+    .row .btn { margin-top: 0; }
+    #login { text-align: center; }
+    #app { display: none; }
+    .section-divider { height: 1px; background: rgba(255,182,193,0.1); margin: 4px 0 16px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>💖 Painel Mary</h1>
+  <p class="subtitle">Controle remoto do app de amor</p>
+
+  <!-- Login -->
+  <div id="login" class="card">
+    <h2>🔐 Acesso</h2>
+    <label>Senha</label>
+    <input type="password" id="password" placeholder="Digite a senha..." />
+    <button class="btn btn-primary" onclick="checkLogin()">Entrar</button>
+    <div id="loginStatus" class="status"></div>
+  </div>
+
+  <div id="app">
+
+    <!-- ── MENSAGEM ESPECIAL ── -->
+    <div class="card">
+      <h2>⚡ Mensagem Especial</h2>
+      <p class="hint">Aparece como popup assim que ela abrir o app. Desaparece após ela fechar.</p>
+
+      <label>Emoji</label>
+      <input type="text" id="msgEmoji" value="💖" maxlength="4" style="width:80px" />
+
+      <label>Título</label>
+      <input type="text" id="msgTitle" placeholder="ex: Oi, amor..." />
+
+      <label>Mensagem</label>
+      <textarea id="msgText" placeholder="Escreva algo especial pra ela..." oninput="previewMsg()"></textarea>
+
+      <div class="special-preview" id="msgPreview">
+        <strong id="previewTitle"></strong>
+        <p id="previewText"></p>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-primary" onclick="saveSpecialMsg()">💌 Enviar Mensagem</button>
+        <button class="btn btn-clear btn-sm" style="flex-shrink:0;padding:12px 16px" onclick="clearSpecialMsg()">✕ Limpar</button>
+      </div>
+      <div id="msgStatus" class="status"></div>
+    </div>
+
+    <!-- ── NOTIFICAÇÕES ── -->
+    <div class="card">
+      <h2>🔔 Notificações</h2>
+
+      <label>Intervalo entre notificações</label>
+      <select id="intervalSelect">
+        <option value="0.5">30 minutos</option>
+        <option value="1" selected>1 hora</option>
+        <option value="2">2 horas</option>
+        <option value="3">3 horas</option>
+        <option value="4">4 horas</option>
+        <option value="6">6 horas</option>
+        <option value="12">12 horas</option>
+        <option value="0">Desativado</option>
+      </select>
+
+      <label>Frases das notificações</label>
+      <div class="row">
+        <textarea id="newPhrase" placeholder="Digite uma frase carinhosa..." style="min-height:60px"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="addPhrase()">+ Adicionar Frase</button>
+      <button class="btn btn-gold" onclick="saveInterval()" style="margin-top:8px">💾 Salvar Intervalo</button>
+      <div id="notifStatus" class="status"></div>
+      <div class="item-list" id="phraseList"></div>
+    </div>
+
+    <!-- ── SURPRESAS ── -->
+    <div class="card">
+      <h2>💝 Surpresas do Dia</h2>
+      <p class="hint">Cada dia ela vê uma surpresa diferente. Adicione aqui as suas.</p>
+
+      <label>Tipo</label>
+      <select id="surpriseType">
+        <option value="frase">💬 Frase Carinhosa</option>
+        <option value="motivacao">⚡ Motivação</option>
+        <option value="desafio">🌟 Desafio Amoroso</option>
+        <option value="memoria">📸 Memória</option>
+        <option value="segredo">🤫 Segredinho</option>
+      </select>
+
+      <label>Emoji</label>
+      <input type="text" id="surpriseEmoji" value="💖" maxlength="4" style="width:80px" />
+
+      <label>Título</label>
+      <input type="text" id="surpriseTitle" placeholder="ex: Pensando em você" />
+
+      <label>Conteúdo</label>
+      <textarea id="surpriseContent" placeholder="Escreva a surpresa..."></textarea>
+
+      <button class="btn btn-primary" onclick="addSurprise()">+ Adicionar Surpresa</button>
+      <div id="surpriseStatus" class="status"></div>
+      <div class="item-list" id="surpriseList"></div>
+    </div>
+
+    <!-- ── DATA DE INÍCIO ── -->
+    <div class="card">
+      <h2>📅 Contador de Dias</h2>
+      <p class="hint">Data que aparece no contador "X dias juntos" no app dela.</p>
+      <label>Data de início (AAAA-MM-DD)</label>
+      <input type="date" id="startDate" />
+      <button class="btn btn-gold" onclick="saveStartDate()">💾 Salvar Data</button>
+      <div id="dateStatus" class="status"></div>
+    </div>
+
+    <button class="btn btn-danger" onclick="logout()">Sair</button>
+    <div style="height:30px"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js';
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js';
+
+  const FIREBASE_CONFIG = {
+    apiKey: 'AIzaSyAXwU0da1u5ATmJecTRnLBalFB6Sbnig_E',
+    authDomain: 'mary-love-2601d.firebaseapp.com',
+    projectId: 'mary-love-2601d',
+    storageBucket: 'mary-love-2601d.firebasestorage.app',
+    messagingSenderId: '687041657673',
+    appId: '1:687041657673:web:a99f393aa2b9423124b898',
+  };
+
+  const ADMIN_PASSWORD = 'mary2024';
+
+  const app = initializeApp(FIREBASE_CONFIG);
+  const db = getFirestore(app);
+
+  let phrases = [];
+  let surprises = [];
+
+  // ── utils ──
+  function showStatus(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.className = `status ${type}`;
+    setTimeout(() => { el.style.display = 'none'; }, 3500);
+  }
+
+  async function writeDoc(col, docId, data) {
+    await setDoc(doc(db, col, docId), { ...data, updatedAt: new Date().toISOString() });
+  }
+
+  // ── Login ──
+  window.checkLogin = async function () {
+    if (document.getElementById('password').value !== ADMIN_PASSWORD) {
+      showStatus('loginStatus', '❌ Senha incorreta', 'err'); return;
+    }
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    await loadAll();
+  };
+
+  window.logout = function () {
+    document.getElementById('login').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('password').value = '';
+  };
+
+  // ── Carregar tudo ──
+  async function loadAll() {
+    const [notifSnap, phrasesSnap, surprisesSnap, dateSnap, msgSnap] = await Promise.all([
+      getDoc(doc(db, 'config', 'notifications')),
+      getDoc(doc(db, 'config', 'phrases')),
+      getDoc(doc(db, 'config', 'surprises')),
+      getDoc(doc(db, 'config', 'startDate')),
+      getDoc(doc(db, 'config', 'specialMessage')),
+    ]);
+
+    if (notifSnap.exists()) document.getElementById('intervalSelect').value = String(notifSnap.data().intervalHours ?? 1);
+    phrases = phrasesSnap.exists() && phrasesSnap.data().list ? phrasesSnap.data().list : [];
+    surprises = surprisesSnap.exists() && surprisesSnap.data().list ? surprisesSnap.data().list : [];
+    if (dateSnap.exists() && dateSnap.data().date) document.getElementById('startDate').value = dateSnap.data().date;
+    if (msgSnap.exists() && msgSnap.data().text) {
+      document.getElementById('msgTitle').value = msgSnap.data().title || '';
+      document.getElementById('msgText').value = msgSnap.data().text || '';
+      document.getElementById('msgEmoji').value = msgSnap.data().emoji || '💖';
+    }
+
+    renderPhrases(); renderSurprises();
+  }
+
+  // ── Mensagem especial ──
+  window.previewMsg = function () {
+    const text = document.getElementById('msgText').value.trim();
+    const title = document.getElementById('msgTitle').value.trim();
+    const preview = document.getElementById('msgPreview');
+    if (text) {
+      document.getElementById('previewTitle').textContent = title || 'Mensagem';
+      document.getElementById('previewText').textContent = text;
+      preview.classList.add('visible');
+    } else {
+      preview.classList.remove('visible');
+    }
+  };
+
+  window.saveSpecialMsg = async function () {
+    const text = document.getElementById('msgText').value.trim();
+    if (!text) { showStatus('msgStatus', '⚠️ Escreva uma mensagem primeiro', 'err'); return; }
+    await writeDoc('config', 'specialMessage', {
+      text,
+      title: document.getElementById('msgTitle').value.trim() || 'Oi, Mary 💖',
+      emoji: document.getElementById('msgEmoji').value.trim() || '💖',
+    });
+    showStatus('msgStatus', '✅ Mensagem enviada! Aparecerá quando ela abrir o app.', 'ok');
+  };
+
+  window.clearSpecialMsg = async function () {
+    await deleteDoc(doc(db, 'config', 'specialMessage'));
+    document.getElementById('msgTitle').value = '';
+    document.getElementById('msgText').value = '';
+    document.getElementById('msgEmoji').value = '💖';
+    document.getElementById('msgPreview').classList.remove('visible');
+    showStatus('msgStatus', '🗑️ Mensagem removida.', 'ok');
+  };
+
+  // ── Notificações ──
+  window.saveInterval = async function () {
+    const hours = parseFloat(document.getElementById('intervalSelect').value);
+    await writeDoc('config', 'notifications', { intervalHours: hours });
+    showStatus('notifStatus', '✅ Intervalo salvo! Aplica na próxima vez que ela abrir.', 'ok');
+  };
+
+  window.addPhrase = async function () {
+    const text = document.getElementById('newPhrase').value.trim();
+    if (!text) return;
+    phrases.push(text);
+    document.getElementById('newPhrase').value = '';
+    await writeDoc('config', 'phrases', { list: phrases });
+    showStatus('notifStatus', '✅ Frase adicionada!', 'ok');
+    renderPhrases();
+  };
+
+  window.deletePhrase = async function (i) {
+    phrases.splice(i, 1);
+    await writeDoc('config', 'phrases', { list: phrases });
+    renderPhrases();
+  };
+
+  function renderPhrases() {
+    const el = document.getElementById('phraseList');
+    el.innerHTML = phrases.length === 0
+      ? '<p class="hint" style="text-align:center;margin-top:8px">Nenhuma frase ainda</p>'
+      : phrases.map((p, i) => `
+        <div class="item">
+          <span class="item-text">${p}</span>
+          <button class="del" onclick="deletePhrase(${i})">✕</button>
+        </div>`).join('');
+  }
+
+  // ── Surpresas ──
+  const BADGE = { frase: 'badge-frase', motivacao: 'badge-motivacao', desafio: 'badge-desafio', memoria: 'badge-memoria', segredo: 'badge-segredo' };
+  const LABELS = { frase: 'Frase', motivacao: 'Motivação', desafio: 'Desafio', memoria: 'Memória', segredo: 'Segredo' };
+
+  window.addSurprise = async function () {
+    const type = document.getElementById('surpriseType').value;
+    const emoji = document.getElementById('surpriseEmoji').value.trim() || '💖';
+    const title = document.getElementById('surpriseTitle').value.trim();
+    const content = document.getElementById('surpriseContent').value.trim();
+    if (!title || !content) { showStatus('surpriseStatus', '⚠️ Preencha título e conteúdo', 'err'); return; }
+    surprises.push({ type, emoji, title, content });
+    document.getElementById('surpriseTitle').value = '';
+    document.getElementById('surpriseContent').value = '';
+    document.getElementById('surpriseEmoji').value = '💖';
+    await writeDoc('config', 'surprises', { list: surprises });
+    showStatus('surpriseStatus', '✅ Surpresa adicionada!', 'ok');
+    renderSurprises();
+  };
+
+  window.deleteSurprise = async function (i) {
+    surprises.splice(i, 1);
+    await writeDoc('config', 'surprises', { list: surprises });
+    renderSurprises();
+  };
+
+  function renderSurprises() {
+    const el = document.getElementById('surpriseList');
+    el.innerHTML = surprises.length === 0
+      ? '<p class="hint" style="text-align:center;margin-top:8px">Nenhuma surpresa ainda</p>'
+      : surprises.map((s, i) => `
+        <div class="item">
+          <span style="font-size:20px;margin-right:4px">${s.emoji}</span>
+          <div class="item-text">
+            <span class="badge ${BADGE[s.type] || ''}">${LABELS[s.type] || s.type}</span>
+            <strong style="font-size:13px">${s.title}</strong>
+            <div class="item-meta">${s.content.substring(0, 60)}${s.content.length > 60 ? '...' : ''}</div>
+          </div>
+          <button class="del" onclick="deleteSurprise(${i})">✕</button>
+        </div>`).join('');
+  }
+
+  // ── Data de início ──
+  window.saveStartDate = async function () {
+    const date = document.getElementById('startDate').value;
+    if (!date) { showStatus('dateStatus', '⚠️ Selecione uma data', 'err'); return; }
+    await writeDoc('config', 'startDate', { date });
+    showStatus('dateStatus', '✅ Data salva! Aplica na próxima abertura.', 'ok');
+  };
+
+  // Enter no login
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.checkLogin();
+  });
+</script>
+</body>
+</html>
