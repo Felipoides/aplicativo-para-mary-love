@@ -1,19 +1,117 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Animated, Dimensions, Modal, Pressable,
+  Animated, Dimensions, Modal, Pressable, ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import HomeScreen from './screens/HomeScreen';
-import FlappyBirdScreen from './screens/FlappyBirdScreen';
+import GamesHubScreen from './screens/GamesHubScreen';
 import LoveLettersScreen from './screens/LoveLettersScreen';
 import SurpriseScreen from './screens/SurpriseScreen';
 import DeveloperScreen from './screens/DeveloperScreen';
+import ThemePickerModal from './components/ThemePickerModal';
 import { scheduleHourlyNotifications } from './utils/notifications';
 import { syncFromFirebase, dismissSpecialMessage } from './utils/firebase';
+import { ThemeProvider, useTheme } from './utils/theme';
+
+const MARY_MESSAGES = [
+  { emoji: '🌹', text: 'Eu podia ter mandado um "bom dia" no zap. Mas você merecia mais que isso, então passei noites aprendendo a fazer esse app. Sou eu, o Matheus, sendo exagerado por você.' },
+  { emoji: '💖', text: 'Tem dia que eu nem acho as palavras certas. Aí eu faço. Esse app é a minha forma desajeitada e sincera de dizer o quanto eu te amo.' },
+  { emoji: '✨', text: 'Você é daquelas pessoas que a gente lembra do nada, no meio do dia, e sorri sozinho. Eu sorrio muito por sua causa, Mary.' },
+  { emoji: '🌸', text: 'Já fiquei até tarde mexendo na cor de um botão só pra ficar do jeitinho que combina com você. Bobo? Talvez. Mas é por você, então vale.' },
+  { emoji: '💫', text: 'Cada tela aqui tem uma decisão que eu tomei pensando "será que ela vai gostar disso?". Spoiler: eu só queria te ver feliz.' },
+  { emoji: '🦋', text: 'Antes de você eu fazia as coisas só por fazer. Você me deu vontade de caprichar, de fazer bonito, de me esforçar de verdade.' },
+  { emoji: '💝', text: 'Não sou bom de poesia, sou melhor de código. Então transformei o que eu sinto em algo que você pode abrir todo dia. Te amo, Mary. — Matheus' },
+];
+
+function MaryScreen({ onOpenThemes }) {
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const floatAnims = useRef(MARY_MESSAGES.map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    Animated.stagger(110, MARY_MESSAGES.map((_, i) =>
+      Animated.spring(floatAnims[i], {
+        toValue: 1, tension: 50, friction: 8, useNativeDriver: true,
+      })
+    )).start();
+  }, []);
+
+  return (
+    <View style={{ flex: 1 }}>
+      <LinearGradient colors={theme.home} style={StyleSheet.absoluteFill} />
+      <ScrollView
+        contentContainerStyle={{ paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={{ alignItems: 'center', marginBottom: 22 }}>
+          <Text style={{ fontSize: 64, marginBottom: 8 }}>🌹</Text>
+          <Text style={{ fontSize: 28, fontWeight: '900', color: theme.textDark, letterSpacing: 0.5 }}>
+            Para Mary
+          </Text>
+          <Text style={{ fontSize: 14, color: theme.textMedium, fontStyle: 'italic', marginTop: 6, textAlign: 'center' }}>
+            Coisas que eu quero que você saiba
+          </Text>
+        </View>
+
+        {/* Botão de tema */}
+        <TouchableOpacity onPress={onOpenThemes} activeOpacity={0.85} style={{ marginBottom: 18 }}>
+          <View style={[styles.themeBtn, { borderColor: theme.accent + '40' }]}>
+            <Text style={{ fontSize: 22 }}>🎨</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: theme.textDark }}>Escolher tema</Text>
+              <Text style={{ fontSize: 12, color: theme.textMedium }}>Deixa o app com a sua cara</Text>
+            </View>
+            <Text style={{ fontSize: 16, color: theme.accent, fontWeight: '900' }}>›</Text>
+          </View>
+        </TouchableOpacity>
+
+        {MARY_MESSAGES.map((item, i) => (
+          <Animated.View
+            key={i}
+            style={{
+              opacity: floatAnims[i],
+              transform: [{ translateY: floatAnims[i].interpolate({ inputRange: [0, 1], outputRange: [30, 0] }) }],
+              backgroundColor: '#FFFFFF',
+              borderRadius: 20,
+              padding: 20,
+              marginBottom: 12,
+              shadowColor: '#C0395A',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              elevation: 4,
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              gap: 14,
+            }}
+          >
+            <Text style={{ fontSize: 32 }}>{item.emoji}</Text>
+            <Text style={{ flex: 1, fontSize: 15, color: '#5A2035', lineHeight: 24, fontStyle: 'italic' }}>
+              {item.text}
+            </Text>
+          </Animated.View>
+        ))}
+
+        <View style={{
+          marginTop: 8, padding: 22, backgroundColor: '#FFFFFF',
+          borderRadius: 20, alignItems: 'center',
+          shadowColor: '#C0395A', shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.1, shadowRadius: 10, elevation: 4,
+        }}>
+          <Text style={{ fontSize: 28, marginBottom: 10 }}>💌</Text>
+          <Text style={{ fontSize: 14, color: '#5A2035', textAlign: 'center', lineHeight: 23, fontStyle: 'italic' }}>
+            Te amo mais do que consigo escrever aqui.{'\n'}
+            Obrigado por ser você. — Matheus 🌹
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
 
 const { width } = Dimensions.get('window');
 
@@ -24,7 +122,7 @@ const TABS = [
   { id: 'mary',      emoji: '🌹', label: 'Mary' },
 ];
 
-function TabItem({ tab, active, onPress, slotWidth }) {
+function TabItem({ tab, active, onPress, slotWidth, accent }) {
   const tabScale = useRef(new Animated.Value(1)).current;
   const handleIn = () =>
     Animated.spring(tabScale, { toValue: 0.85, useNativeDriver: true, speed: 50 }).start();
@@ -39,18 +137,10 @@ function TabItem({ tab, active, onPress, slotWidth }) {
       onPressOut={handleOut}
     >
       <Animated.View style={{ alignItems: 'center', transform: [{ scale: tabScale }] }}>
-        <Text style={[
-          styles.tabEmoji,
-          active && styles.tabEmojiActive,
-          tab.id === 'mary' && styles.tabEmojiMuted,
-        ]}>
+        <Text style={[styles.tabEmoji, active && styles.tabEmojiActive]}>
           {tab.emoji}
         </Text>
-        <Text style={[
-          styles.tabLabel,
-          active && styles.tabLabelActive,
-          tab.id === 'mary' && styles.tabLabelMuted,
-        ]}>
+        <Text style={[styles.tabLabel, active && { color: accent, fontWeight: '800' }]}>
           {tab.label}
         </Text>
       </Animated.View>
@@ -60,6 +150,7 @@ function TabItem({ tab, active, onPress, slotWidth }) {
 
 function TabBar({ activeTab, onTabPress, onGamePress }) {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
   const indicatorX = useRef(new Animated.Value(0)).current;
   const TAB_SLOT_W = (width - 40) / 5;
 
@@ -81,29 +172,28 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
   return (
     <View style={[styles.tabBarOuter, { paddingBottom: insets.bottom }]}>
       <View style={styles.tabBarCard}>
-        {/* Active indicator pill */}
         <Animated.View
           style={[
             styles.tabIndicator,
-            { width: TAB_SLOT_W, transform: [{ translateX: indicatorX }] },
+            { width: TAB_SLOT_W, backgroundColor: theme.accent + '1A', transform: [{ translateX: indicatorX }] },
           ]}
         />
 
-        <TabItem tab={TABS[0]} active={activeTab === 'home'} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('home')} />
-        <TabItem tab={TABS[1]} active={activeTab === 'letters'} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('letters')} />
+        <TabItem tab={TABS[0]} active={activeTab === 'home'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('home')} />
+        <TabItem tab={TABS[1]} active={activeTab === 'letters'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('letters')} />
 
         {/* Center FAB */}
         <View style={[styles.fabSlot, { width: TAB_SLOT_W }]}>
           <Pressable style={styles.fab} onPress={onGamePress}>
-            <LinearGradient colors={['#C0395A', '#8B1E3F']} style={styles.fabGrad} borderRadius={30}>
+            <LinearGradient colors={[theme.accent, theme.accentDark]} style={styles.fabGrad} borderRadius={30}>
               <Text style={styles.fabEmoji}>🎮</Text>
               <Text style={styles.fabLabel}>Jogar</Text>
             </LinearGradient>
           </Pressable>
         </View>
 
-        <TabItem tab={TABS[2]} active={activeTab === 'surprises'} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('surprises')} />
-        <TabItem tab={TABS[3]} active={false} slotWidth={TAB_SLOT_W} onPress={() => {}} />
+        <TabItem tab={TABS[2]} active={activeTab === 'surprises'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('surprises')} />
+        <TabItem tab={TABS[3]} active={activeTab === 'mary'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('mary')} />
       </View>
     </View>
   );
@@ -111,10 +201,12 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
 
 function AppInner() {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('home');
   const [showGame, setShowGame] = useState(false);
   const [showDev, setShowDev] = useState(false);
   const [devMode, setDevMode] = useState(false);
+  const [showThemes, setShowThemes] = useState(false);
   const [specialMsg, setSpecialMsg] = useState(null);
   const screenFade = useRef(new Animated.Value(1)).current;
   const msgScale = useRef(new Animated.Value(0.85)).current;
@@ -154,7 +246,7 @@ function AppInner() {
     return (
       <>
         <StatusBar style="light" />
-        <FlappyBirdScreen onBack={() => setShowGame(false)} />
+        <GamesHubScreen onClose={() => setShowGame(false)} />
       </>
     );
   }
@@ -172,6 +264,7 @@ function AppInner() {
     switch (activeTab) {
       case 'letters':   return <LoveLettersScreen />;
       case 'surprises': return <SurpriseScreen />;
+      case 'mary':      return <MaryScreen onOpenThemes={() => setShowThemes(true)} />;
       default:          return (
         <HomeScreen
           navigate={(screen) => {
@@ -179,6 +272,7 @@ function AppInner() {
             else if (screen === 'letters') navigateTo('letters');
             else if (screen === 'surprises') navigateTo('surprises');
           }}
+          onOpenThemes={() => setShowThemes(true)}
           onUnlockDev={() => { setDevMode(true); setShowDev(true); }}
         />
       );
@@ -186,8 +280,8 @@ function AppInner() {
   };
 
   return (
-    <View style={styles.root}>
-      <StatusBar style="dark" />
+    <View style={[styles.root, { backgroundColor: theme.home[0] }]}>
+      <StatusBar style={theme.statusBar} />
 
       {/* Mensagem especial */}
       <Modal visible={!!specialMsg} transparent animationType="none">
@@ -211,6 +305,8 @@ function AppInner() {
           </Animated.View>
         </View>
       </Modal>
+
+      <ThemePickerModal visible={showThemes} onClose={() => setShowThemes(false)} />
 
       <Animated.View style={[styles.screen, { opacity: screenFade }]}>
         {renderScreen()}
@@ -239,6 +335,14 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#FFF0F5' },
   screen: { flex: 1 },
 
+  themeBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: '#FFFFFF', borderRadius: 18, padding: 16,
+    borderWidth: 1.5,
+    shadowColor: '#C0395A', shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08, shadowRadius: 8, elevation: 3,
+  },
+
   devFab: {
     position: 'absolute', right: 14,
     width: 36, height: 36, borderRadius: 18,
@@ -266,17 +370,13 @@ const styles = StyleSheet.create({
   },
   tabIndicator: {
     position: 'absolute', height: 52, borderRadius: 26,
-    backgroundColor: '#FFF0F5',
     top: 4,
   },
 
   tab: { alignItems: 'center', justifyContent: 'center', paddingVertical: 4 },
   tabEmoji: { fontSize: 22, opacity: 0.45, marginBottom: 2 },
   tabEmojiActive: { opacity: 1 },
-  tabEmojiMuted: { opacity: 0.35 },
   tabLabel: { fontSize: 10, color: '#C48EA0', fontWeight: '600' },
-  tabLabelActive: { color: '#C0395A', fontWeight: '800' },
-  tabLabelMuted: { color: '#D4AABB' },
 
   fabSlot: { alignItems: 'center', justifyContent: 'center' },
   fab: {
@@ -319,7 +419,9 @@ const styles = StyleSheet.create({
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AppInner />
+      <ThemeProvider>
+        <AppInner />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

@@ -43,6 +43,14 @@ const HIT_R = BIRD_R * 0.52;
 // ── Input buffer ─────────────────────────────────────────────────────────────
 const JUMP_BUFFER_MS = 150;
 
+// ── Difficulty ───────────────────────────────────────────────────────────────
+const DIFFICULTIES = {
+  facil:   { id: 'facil',   label: 'Fácil',   emoji: '🌱', gap: 250, gravity: 0.46, speed: 2.2, interval: 2150 },
+  medio:   { id: 'medio',   label: 'Médio',   emoji: '🔥', gap: 215, gravity: 0.52, speed: 2.6, interval: 1950 },
+  dificil: { id: 'dificil', label: 'Difícil', emoji: '💀', gap: 175, gravity: 0.58, speed: 3.3, interval: 1650 },
+};
+const DIFF_LIST = Object.values(DIFFICULTIES);
+
 // ── Decorations ──────────────────────────────────────────────────────────────
 const BG_STARS = [
   { e: '✨', x: SW * 0.08, y: 70  },
@@ -183,6 +191,28 @@ function Clouds({ speedRef }) {
   );
 }
 
+// ── Difficulty Picker ──────────────────────────────────────────────────────────
+function DiffPicker({ value, onChange }) {
+  return (
+    <View style={S.diffWrap}>
+      {DIFF_LIST.map((d) => {
+        const active = value === d.id;
+        return (
+          <TouchableOpacity
+            key={d.id}
+            onPress={() => onChange(d.id)}
+            activeOpacity={0.8}
+            style={[S.diffBtn, active && S.diffBtnActive]}
+          >
+            <Text style={S.diffEmoji}>{d.emoji}</Text>
+            <Text style={[S.diffTxt, active && S.diffTxtActive]}>{d.label}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function FlappyBirdScreen({ onBack }) {
   const insets = useSafeAreaInsets();
@@ -192,6 +222,7 @@ export default function FlappyBirdScreen({ onBack }) {
   const [pipes, setPipes]           = useState([]);
   const [bursts, setBursts]         = useState([]);
   const [scoreFlash, setScoreFlash] = useState(false);
+  const [difficulty, setDifficulty] = useState('medio');
 
   const G = useRef({
     phase: 'idle',
@@ -203,10 +234,14 @@ export default function FlappyBirdScreen({ onBack }) {
     nextId:     0,
     speed:      PIPE_SPEED_BASE,
     interval:   PIPE_INTERVAL_BASE,
+    gap:        PIPE_GAP,
+    gravity:    GRAVITY,
     jumpBuffer: 0,
   });
 
   const speedRef = useRef(PIPE_SPEED_BASE); // para Clouds sem re-render
+  const difficultyRef = useRef('medio');
+  useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
 
   const birdY      = useRef(new Animated.Value(FLOOR_Y * 0.40)).current;
   const birdRot    = useRef(new Animated.Value(0)).current;
@@ -321,7 +356,7 @@ export default function FlappyBirdScreen({ onBack }) {
     }
 
     // Physics
-    g.vel = Math.min(g.vel + GRAVITY * dt, MAX_FALL);
+    g.vel = Math.min(g.vel + g.gravity * dt, MAX_FALL);
     g.by += g.vel * dt;
 
     // Spawn pipe
@@ -333,8 +368,8 @@ export default function FlappyBirdScreen({ onBack }) {
       const id     = g.nextId++;
       xAnims.current[id] = new Animated.Value(SW + PIPE_W);
       g.pipes.push({ id, x: SW + PIPE_W, gapY, scored: false });
-      const topH = Math.max(0, gapY - PIPE_GAP / 2 - CEILING_Y);
-      const botY = gapY + PIPE_GAP / 2;
+      const topH = Math.max(0, gapY - g.gap / 2 - CEILING_Y);
+      const botY = gapY + g.gap / 2;
       const botH = Math.max(0, FLOOR_Y - botY);
       pAdd.current.push({ id, topH, botY, botH });
     }
@@ -370,8 +405,8 @@ export default function FlappyBirdScreen({ onBack }) {
 
     for (const p of g.pipes) {
       if (bcx + HIT_R < p.x || bcx - HIT_R > p.x + PIPE_W) continue;
-      const gapTop = p.gapY - PIPE_GAP / 2;
-      const gapBot = p.gapY + PIPE_GAP / 2;
+      const gapTop = p.gapY - g.gap / 2;
+      const gapBot = p.gapY + g.gap / 2;
       if (bcy - HIT_R < gapTop || bcy + HIT_R > gapBot) {
         const nearX = Math.max(p.x, Math.min(bcx, p.x + PIPE_W));
         const nearY = bcy < gapTop
@@ -420,6 +455,8 @@ export default function FlappyBirdScreen({ onBack }) {
     pAdd.current = [];
     pRem.current.clear();
 
+    const conf = DIFFICULTIES[difficultyRef.current] || DIFFICULTIES.medio;
+
     g.phase      = 'playing';
     g.by         = FLOOR_Y * 0.40;
     g.vel        = 0;
@@ -427,10 +464,12 @@ export default function FlappyBirdScreen({ onBack }) {
     g.score      = 0;
     g.lastPipe   = Date.now() + 1500;
     g.nextId     = 0;
-    g.speed      = PIPE_SPEED_BASE;
-    g.interval   = PIPE_INTERVAL_BASE;
+    g.speed      = conf.speed;
+    g.interval   = conf.interval;
+    g.gap        = conf.gap;
+    g.gravity    = conf.gravity;
     g.jumpBuffer = 0;
-    speedRef.current = PIPE_SPEED_BASE;
+    speedRef.current = conf.speed;
 
     birdY.setValue(g.by);
     birdRot.setValue(0);
@@ -453,9 +492,11 @@ export default function FlappyBirdScreen({ onBack }) {
     if (g.phase === 'idle' || g.phase === 'dead') {
       startGame();
     } else if (g.phase === 'playing') {
-      g.jumpBuffer = Date.now();
+      g.vel = JUMP_VEL;
+      g.jumpBuffer = 0;
+      doJumpJuice();
     }
-  }, [startGame]);
+  }, [startGame, doJumpJuice]);
 
   // ── Render ────────────────────────────────────────────────────────────────
   const isNewRecord = phase === 'dead' && score > 0 && score >= best;
@@ -542,6 +583,8 @@ export default function FlappyBirdScreen({ onBack }) {
                   <Text style={S.bestLabel}>🏆 Recorde</Text>
                   <Text style={S.bestVal}>{best}</Text>
                 </View>
+                <Text style={S.diffTitle}>Dificuldade</Text>
+                <DiffPicker value={difficulty} onChange={setDifficulty} />
                 <View style={S.tapBtn}>
                   <Text style={S.tapTxt}>✨ Toque para começar ✨</Text>
                 </View>
@@ -576,6 +619,8 @@ export default function FlappyBirdScreen({ onBack }) {
                   </View>
                 </View>
 
+                <Text style={S.diffTitle}>Dificuldade</Text>
+                <DiffPicker value={difficulty} onChange={setDifficulty} />
                 <View style={S.tapBtn}>
                   <Text style={S.tapTxt}>💕 Toque para tentar de novo 💕</Text>
                 </View>
@@ -689,7 +734,7 @@ const S = StyleSheet.create({
 
   // Overlays
   overlay: {
-    position: 'absolute', inset: 0,
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(10,2,20,0.72)',
     paddingHorizontal: 24,
@@ -725,6 +770,21 @@ const S = StyleSheet.create({
   },
   bestLabel: { fontSize: 14, color: 'rgba(255,255,255,0.6)', fontWeight: '600' },
   bestVal:   { fontSize: 22, fontWeight: '900', color: '#FFD700' },
+
+  diffTitle: {
+    fontSize: 11, color: 'rgba(255,255,255,0.6)', fontWeight: '700',
+    letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8,
+  },
+  diffWrap: { flexDirection: 'row', gap: 8, marginBottom: 18 },
+  diffBtn: {
+    alignItems: 'center', paddingVertical: 8, paddingHorizontal: 14,
+    borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.18)', minWidth: 72,
+  },
+  diffBtnActive: { backgroundColor: 'rgba(192,57,90,0.7)', borderColor: '#FF85A1' },
+  diffEmoji: { fontSize: 18, marginBottom: 2 },
+  diffTxt: { color: 'rgba(255,255,255,0.75)', fontWeight: '800', fontSize: 12 },
+  diffTxtActive: { color: '#FFFFFF' },
 
   tapBtn: {
     backgroundColor: 'rgba(192,57,90,0.5)',

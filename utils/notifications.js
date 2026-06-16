@@ -1,12 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { getPhrases } from './storage';
+import * as Notifications from 'expo-notifications';
 
-// expo-notifications não funciona no Expo Go SDK 53+, só em dev/production build.
-// Todas as chamadas são envoltas em try/catch para não quebrar o app.
-let Notifications = null;
+// No Expo Go SDK 53+, notificações remotas foram removidas.
+// Notificações locais ainda funcionam, mas setNotificationHandler pode lançar.
+// Usamos try/catch em cada chamada individualmente.
 try {
-  Notifications = require('expo-notifications');
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -43,7 +43,6 @@ export const NOTIFICATION_INTERVALS = [
 ];
 
 export async function requestNotificationPermission() {
-  if (!Notifications) return false;
   try {
     const { status: existing } = await Notifications.getPermissionsAsync();
     if (existing === 'granted') return true;
@@ -62,7 +61,6 @@ export async function setNotificationInterval(hours) {
 }
 
 export async function scheduleHourlyNotifications(intervalHours) {
-  if (!Notifications) return false;
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
 
@@ -100,14 +98,28 @@ export async function scheduleHourlyNotifications(intervalHours) {
 }
 
 export async function cancelAllNotifications() {
-  if (!Notifications) return;
   try { await Notifications.cancelAllScheduledNotificationsAsync(); } catch (_) {}
 }
 
 export async function getScheduledCount() {
-  if (!Notifications) return 0;
   try {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
     return scheduled.length;
   } catch (_) { return 0; }
+}
+
+export async function sendTestNotification(phrase) {
+  try {
+    const granted = await requestNotificationPermission();
+    if (!granted) return false;
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '💌 Frase do dia para Mary',
+        body: phrase,
+        sound: true,
+      },
+      trigger: { seconds: 3 },
+    });
+    return true;
+  } catch (_) { return false; }
 }

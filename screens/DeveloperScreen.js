@@ -9,20 +9,17 @@ import {
   getStartDate, setStartDate, getLetters, saveLetters,
   getPhrases, savePhrases, getOpenCount, getFlappyBest,
   getFlappyGamesPlayed, getDaysTogether, resetAll,
+  getMemoryBestOverall, getCatchBest,
 } from '../utils/storage';
 import {
   NOTIFICATION_INTERVALS, getNotificationInterval,
   setNotificationInterval, scheduleHourlyNotifications,
   cancelAllNotifications, getScheduledCount,
+  sendTestNotification,
 } from '../utils/notifications';
 import { LOVE_LETTERS, LOVE_PHRASES } from '../constants/phrases';
-
-const THEMES = [
-  { id: 'rose', label: '🌹 Rosa', desc: 'Romântico clássico' },
-  { id: 'sakura', label: '🌸 Sakura', desc: 'Flor de cerejeira' },
-  { id: 'midnight', label: '🌙 Meia-noite', desc: 'Escuro e apaixonante' },
-  { id: 'sunset', label: '🌅 Pôr do Sol', desc: 'Dourado e caloroso' },
-];
+import { THEME_LIST } from '../constants/themes';
+import { useTheme } from '../utils/theme';
 
 function DevSection({ title, emoji, children }) {
   const [open, setOpen] = useState(false);
@@ -69,16 +66,16 @@ function StatCard({ label, value, emoji }) {
 
 export default function DeveloperScreen({ onBack }) {
   const insets = useSafeAreaInsets();
+  const { themeId, changeTheme } = useTheme();
   const [startDate, setStartDateState] = useState('');
   const [dateInput, setDateInput] = useState('');
   const [letters, setLetters] = useState([]);
   const [phrases, setPhrases] = useState([]);
-  const [stats, setStats] = useState({ opens: 0, best: 0, games: 0, days: 0 });
+  const [stats, setStats] = useState({ opens: 0, best: 0, games: 0, days: 0, memBest: 0, catchBest: 0 });
   const [newPhraseText, setNewPhraseText] = useState('');
   const [editingLetter, setEditingLetter] = useState(null);
   const [letterTitle, setLetterTitle] = useState('');
   const [letterContent, setLetterContent] = useState('');
-  const [selectedTheme, setSelectedTheme] = useState('rose');
   const [notifInterval, setNotifIntervalState] = useState(1);
   const [notifCount, setNotifCount] = useState(0);
 
@@ -94,7 +91,7 @@ export default function DeveloperScreen({ onBack }) {
   }, []);
 
   const loadData = async () => {
-    const [sd, lts, phs, opens, best, games, days, interval, count] = await Promise.all([
+    const [sd, lts, phs, opens, best, games, days, interval, count, memBest, catchBest] = await Promise.all([
       getStartDate(),
       getLetters(),
       getPhrases(),
@@ -104,12 +101,14 @@ export default function DeveloperScreen({ onBack }) {
       getDaysTogether(),
       getNotificationInterval(),
       getScheduledCount(),
+      getMemoryBestOverall(),
+      getCatchBest(),
     ]);
     setStartDateState(sd);
     setDateInput(sd);
     setLetters(lts);
     setPhrases(phs);
-    setStats({ opens, best, games, days });
+    setStats({ opens, best, games, days, memBest, catchBest });
     setNotifIntervalState(interval);
     setNotifCount(count);
   };
@@ -269,6 +268,8 @@ export default function DeveloperScreen({ onBack }) {
               <StatCard label="Vezes Abertas" value={stats.opens} emoji="💕" />
               <StatCard label="Recorde Flappy" value={stats.best} emoji="🏆" />
               <StatCard label="Partidas Jogadas" value={stats.games} emoji="🎮" />
+              <StatCard label="Memória (jogadas)" value={stats.memBest || '—'} emoji="🧠" />
+              <StatCard label="Pega-Corações" value={stats.catchBest} emoji="💝" />
             </View>
             <Text style={devStyles.analyticsNote}>
               📈 Cada abertura é um sorriso que vale a pena registrar.
@@ -292,6 +293,30 @@ export default function DeveloperScreen({ onBack }) {
                 <Text style={devStyles.saveBtnText}>💾 Salvar Data</Text>
               </LinearGradient>
             </TouchableOpacity>
+          </DevSection>
+
+          {/* Theme */}
+          <DevSection title="Tema do App" emoji="🎨">
+            <Text style={devStyles.fieldHint}>
+              O tema também pode ser trocado pela Mary na aba 🌹 Mary.
+            </Text>
+            <View style={devStyles.notifGrid}>
+              {THEME_LIST.map((t) => {
+                const active = themeId === t.id;
+                return (
+                  <TouchableOpacity
+                    key={t.id}
+                    style={[devStyles.notifBtn, active && devStyles.notifBtnActive]}
+                    onPress={() => changeTheme(t.id)}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={[devStyles.notifBtnText, active && devStyles.notifBtnTextActive]}>
+                      {t.emoji} {t.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </DevSection>
 
           {/* Phrases Manager */}
@@ -366,6 +391,23 @@ export default function DeveloperScreen({ onBack }) {
 
           {/* Notifications */}
           <DevSection title="Notificações para Mary" emoji="🔔">
+            <TouchableOpacity
+              style={[devStyles.saveBtn, { marginBottom: 16 }]}
+              onPress={async () => {
+                const phrases = await getPhrases();
+                const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+                const ok = await sendTestNotification(phrase);
+                if (ok) {
+                  Alert.alert('✅ Notificação enviada!', `Mary vai receber em 3 segundos:\n\n"${phrase.substring(0, 80)}..."`);
+                } else {
+                  Alert.alert('⚠️ Indisponível', 'Notificações locais não estão disponíveis neste ambiente.\nUse um build de desenvolvimento.');
+                }
+              }}
+            >
+              <LinearGradient colors={['#2C7A2C', '#4CAF50']} style={devStyles.saveBtnGrad} borderRadius={12}>
+                <Text style={devStyles.saveBtnText}>🔔 Testar Frase do Dia Agora</Text>
+              </LinearGradient>
+            </TouchableOpacity>
             <Text style={devStyles.fieldLabel}>
               Intervalo atual:{' '}
               <Text style={{ color: '#FFD700', fontWeight: '800' }}>
@@ -408,13 +450,95 @@ export default function DeveloperScreen({ onBack }) {
           </DevSection>
 
           {/* Credits */}
-          <View style={devStyles.credits}>
-            <Text style={devStyles.creditsTitle}>💖 Sobre este App</Text>
-            <Text style={devStyles.creditsText}>
-              Feito com amor, linha por linha.{'\n'}
-              Cada funcionalidade pensada especialmente para Mary.{'\n\n'}
-              Tecnologia: Expo · React Native{'\n'}
-              Feito com: ❤️ infinito
+          <View style={devStyles.creditsCard}>
+            {/* Header */}
+            <LinearGradient
+              colors={['rgba(212,175,55,0.18)', 'rgba(192,57,90,0.12)', 'transparent']}
+              style={devStyles.creditsHeaderBg}
+            />
+            <Text style={devStyles.creditsBigEmoji}>💖</Text>
+            <Text style={devStyles.creditsTitle}>Criado pelo Matheus</Text>
+            <Text style={devStyles.creditsSubtitle}>feito do zero, à mão, só pra Mary</Text>
+
+            <View style={devStyles.creditsDivider} />
+
+            {/* Esforço */}
+            <Text style={devStyles.creditsSectionLabel}>⏱️ O que foi necessário</Text>
+            {[
+              { emoji: '🌙', label: 'Madrugadas viradas', value: 'várias' },
+              { emoji: '🧠', label: 'Horas de planejamento', value: 'incontáveis' },
+              { emoji: '💻', label: 'Linhas de código escritas', value: '+4.000' },
+              { emoji: '🐛', label: 'Bugs corrigidos no grito', value: 'sem fim' },
+              { emoji: '☕', label: 'Cafés e paciência', value: '100%' },
+              { emoji: '💕', label: 'Amor por trás de tudo', value: 'infinito' },
+            ].map((item, i) => (
+              <View key={i} style={devStyles.creditsRow}>
+                <Text style={devStyles.creditsRowEmoji}>{item.emoji}</Text>
+                <Text style={devStyles.creditsRowLabel}>{item.label}</Text>
+                <Text style={devStyles.creditsRowValue}>{item.value}</Text>
+              </View>
+            ))}
+
+            <View style={devStyles.creditsDivider} />
+
+            {/* Tecnologias */}
+            <Text style={devStyles.creditsSectionLabel}>🛠️ Tecnologias utilizadas</Text>
+            {[
+              { emoji: '⚛️', name: 'React Native', desc: 'base do aplicativo' },
+              { emoji: '📱', name: 'Expo SDK 54', desc: 'plataforma de desenvolvimento' },
+              { emoji: '🔥', name: 'Firebase / Firestore', desc: 'mensagens especiais em tempo real' },
+              { emoji: '🔔', name: 'Expo Notifications', desc: 'frases do dia agendadas' },
+              { emoji: '🎨', name: 'Expo Linear Gradient', desc: 'todos os degradês bonitos' },
+              { emoji: '💾', name: 'AsyncStorage', desc: 'dados salvos no celular' },
+              { emoji: '🎮', name: 'React Native Animated', desc: 'todas as animações do app e do Flappy Love' },
+            ].map((item, i) => (
+              <View key={i} style={devStyles.techRow}>
+                <Text style={devStyles.techEmoji}>{item.emoji}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={devStyles.techName}>{item.name}</Text>
+                  <Text style={devStyles.techDesc}>{item.desc}</Text>
+                </View>
+              </View>
+            ))}
+
+            <View style={devStyles.creditsDivider} />
+
+            {/* Funcionalidades */}
+            <Text style={devStyles.creditsSectionLabel}>✨ O que foi construído</Text>
+            {[
+              '💌 Sistema de cartas de amor personalizáveis',
+              '💝 Surpresa do dia com conteúdo rotativo',
+              '📅 Contador de dias juntos em tempo real',
+              '🔔 Notificações de frases agendadas automaticamente',
+              '🎮 Três joguinhos feitos do zero (Flappy, Memória e Pega-Corações)',
+              '🎨 Seis temas pra você deixar o app com a sua cara',
+              '🌹 Tela especial "Para Mary"',
+              '🔥 Integração com Firebase para mensagens remotas',
+              '📱 Funciona no iPhone, Android e na web',
+              '⚙️ Painel de administração completo',
+            ].map((feat, i) => (
+              <Text key={i} style={devStyles.featItem}>{feat}</Text>
+            ))}
+
+            <View style={devStyles.creditsDivider} />
+
+            {/* Mensagem final */}
+            <View style={devStyles.creditsNote}>
+              <Text style={devStyles.creditsNoteText}>
+                Mary, eu podia ter te dado algo comum.{'\n'}
+                Mas você não é comum pra mim.{'\n\n'}
+                Então eu virei a noite, aprendi do zero,{'\n'}
+                errei mil vezes e refiz tudo de novo —{'\n'}
+                porque eu faço questão de fazer coisas de{'\n'}
+                níveis absurdos por você.{'\n\n'}
+                Não porque eu precisava.{'\n'}
+                Mas porque é assim que eu te amo. 🌹{'\n\n'}
+                — Matheus
+              </Text>
+            </View>
+
+            <Text style={devStyles.creditsFooter}>
+              v1.1 · MaryLove App · feito com amor pelo Matheus
             </Text>
           </View>
           <View style={{ height: 40 }} />
@@ -522,11 +646,66 @@ const devStyles = StyleSheet.create({
   },
   dangerBtnText: { color: '#FF6B6B', fontWeight: '700', fontSize: 14 },
 
-  credits: {
-    marginTop: 8, padding: 20,
-    backgroundColor: 'rgba(212,175,55,0.06)', borderRadius: 16,
-    borderWidth: 1, borderColor: 'rgba(212,175,55,0.15)', alignItems: 'center',
+  creditsCard: {
+    marginTop: 8, borderRadius: 20, overflow: 'hidden',
+    borderWidth: 1, borderColor: 'rgba(212,175,55,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    padding: 22,
   },
-  creditsTitle: { fontSize: 16, fontWeight: '900', color: '#FFD700', marginBottom: 12 },
-  creditsText: { fontSize: 13, color: 'rgba(255,214,228,0.85)', textAlign: 'center', lineHeight: 22 },
+  creditsHeaderBg: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 20,
+  },
+  creditsBigEmoji: { fontSize: 44, textAlign: 'center', marginBottom: 8 },
+  creditsTitle: {
+    fontSize: 20, fontWeight: '900', color: '#FFD700',
+    textAlign: 'center', letterSpacing: 0.5,
+  },
+  creditsSubtitle: {
+    fontSize: 12, color: 'rgba(255,182,193,0.7)',
+    textAlign: 'center', fontStyle: 'italic', marginTop: 4,
+  },
+  creditsDivider: {
+    height: 1, backgroundColor: 'rgba(255,182,193,0.15)',
+    marginVertical: 16,
+  },
+  creditsSectionLabel: {
+    fontSize: 11, color: '#FFD700', fontWeight: '800',
+    letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 12,
+  },
+  creditsRow: {
+    flexDirection: 'row', alignItems: 'center',
+    marginBottom: 10, gap: 10,
+  },
+  creditsRowEmoji: { fontSize: 18, width: 26 },
+  creditsRowLabel: { flex: 1, fontSize: 13, color: 'rgba(255,214,228,0.8)' },
+  creditsRowValue: {
+    fontSize: 13, fontWeight: '800', color: '#FFD700',
+  },
+  techRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12, padding: 12, marginBottom: 8, gap: 12,
+    borderWidth: 1, borderColor: 'rgba(212,175,55,0.1)',
+  },
+  techEmoji: { fontSize: 22 },
+  techName: { fontSize: 13, fontWeight: '800', color: '#FFD6E4' },
+  techDesc: { fontSize: 11, color: 'rgba(255,182,193,0.6)', marginTop: 2 },
+  featItem: {
+    fontSize: 13, color: 'rgba(255,214,228,0.85)',
+    marginBottom: 7, lineHeight: 20,
+  },
+  creditsNote: {
+    backgroundColor: 'rgba(192,57,90,0.12)',
+    borderRadius: 14, padding: 18, marginBottom: 16,
+    borderWidth: 1, borderColor: 'rgba(192,57,90,0.25)',
+  },
+  creditsNoteText: {
+    fontSize: 14, color: 'rgba(255,200,220,0.95)',
+    textAlign: 'center', lineHeight: 24, fontStyle: 'italic',
+  },
+  creditsFooter: {
+    fontSize: 10, color: 'rgba(255,182,193,0.4)',
+    textAlign: 'center', letterSpacing: 1,
+  },
 });

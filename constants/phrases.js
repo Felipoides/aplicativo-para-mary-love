@@ -1,12 +1,16 @@
 export const LOVE_PHRASES = [
-  "Te ver mesmo naquele inferno ainda sim é minha parte favorita do dia❤️.",
-  "Passando só para lembrar: você é amada mesmo sendo uma ''chata''❤️.",
-  "O mundo fica mais leve de saber que você existe nele❤️‍🩹.",
-  "Tem alguém aqui torcendo por você e pensando em receber um abraço seu❤️‍🩹.",
-  "Você é maravilhosa, até nos dias difíceis💖.",
-  "Meu lugar favorito continua sendo qualquer lugar onde você esteja💖.",
-  "Você merece carinho no meio da rotina, então aqui vai minha forma de demonstrar carinho sendo nerd😳",
-  "Se um dia o mundo reiniciar, eu ainda daria um jeito de te encontrar💖."
+  "Acordei pensando em você de novo. Já virou rotina e eu não quero que mude. ❤️",
+  "Mesmo nos dias ruins, te ver continua sendo a melhor parte do meu dia. Sem exagero.",
+  "Você é chata às vezes, sim. E eu te amo do mesmo jeito, talvez até mais. 😏❤️",
+  "Sei que hoje pode tá pesado. Respira. Eu tô aqui, do seu lado, sempre.",
+  "Não sei fazer poesia, mas sei que você é a melhor coisa que me aconteceu.",
+  "Meu lugar favorito do mundo é onde você estiver. Simples assim.",
+  "Se eu pudesse, fazia esse app sorrir de volta pra você toda vez que você abre ele. 🌹",
+  "Você não precisa ser forte o tempo todo. Comigo pode ser só você.",
+  "Toda vez que você ri eu esqueço metade dos meus problemas. É meio mágico isso.",
+  "Eu escolhi você. E escolheria de novo, todo dia, em qualquer versão dessa vida.",
+  "Lembra que tem alguém que te acha incrível mesmo nos dias que você não se acha.",
+  "Fiz esse cantinho só pra te lembrar de uma coisa: você é muito amada, Mary. 💖",
 ];
 
 export const LOVE_LETTERS = [
@@ -238,7 +242,7 @@ export const SURPRISES = [
     type: 'segredo',
     emoji: '🤫',
     title: 'Curiosidade',
-    content: 'Esse app tem mais de duas mil linhas de código. Passei mais tempo debugando do que dormindo em alguns dias. Valeu cada segundo. 💕',
+    content: 'Esse app tem mais de três mil linhas de código. Eu podia ter mandado uma mensagem no WhatsApp. Mas aí pensei: ela merece mais do que isso. 💕',
   },
   {
     type: 'segredo',

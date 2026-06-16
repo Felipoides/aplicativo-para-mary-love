@@ -48,6 +48,44 @@ export const getFlappyBest = async () => {
 export const setFlappyBest = async (score) =>
   AsyncStorage.setItem('flappy_best', String(score));
 
+// Jogo da memória: melhor = menor número de jogadas (0 = ainda não jogou),
+// guardado por dificuldade (facil | medio | dificil)
+export const getMemoryBest = async (diff = 'medio') => {
+  const v = await AsyncStorage.getItem(`memory_best_${diff}`);
+  return v ? parseInt(v) : 0;
+};
+
+export const setMemoryBest = async (diff, moves) => {
+  const cur = await getMemoryBest(diff);
+  if (cur === 0 || moves < cur) {
+    await AsyncStorage.setItem(`memory_best_${diff}`, String(moves));
+    return true;
+  }
+  return false;
+};
+
+// Melhor marca geral da memória (menor nº de jogadas entre as dificuldades)
+export const getMemoryBestOverall = async () => {
+  const vals = await Promise.all(['facil', 'medio', 'dificil'].map((d) => getMemoryBest(d)));
+  const nonZero = vals.filter((v) => v > 0);
+  return nonZero.length ? Math.min(...nonZero) : 0;
+};
+
+// Pega-corações: melhor = maior pontuação
+export const getCatchBest = async () => {
+  const v = await AsyncStorage.getItem('catch_best');
+  return v ? parseInt(v) : 0;
+};
+
+export const setCatchBest = async (score) => {
+  const cur = await getCatchBest();
+  if (score > cur) {
+    await AsyncStorage.setItem('catch_best', String(score));
+    return true;
+  }
+  return false;
+};
+
 export const incrementOpenCount = async () => {
   const v = await AsyncStorage.getItem('open_count');
   const count = (v ? parseInt(v) : 0) + 1;
@@ -107,6 +145,7 @@ export const resetAll = async () => {
   const keys = [
     'start_date', 'letters', 'phrases', 'flappy_best',
     'open_count', 'surprise_date', 'surprise_index', 'theme', 'flappy_games',
+    'memory_best_facil', 'memory_best_medio', 'memory_best_dificil', 'catch_best',
   ];
   await AsyncStorage.multiRemove(keys);
 };

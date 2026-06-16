@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FloatingHearts from '../components/FloatingHearts';
 import { getDaysTogether, getTodayPhrase, incrementOpenCount } from '../utils/storage';
+import { useTheme } from '../utils/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -30,8 +31,9 @@ function PressCard({ onPress, style, children }) {
   );
 }
 
-export default function HomeScreen({ navigate, onUnlockDev }) {
+export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
   const [days, setDays] = useState(0);
   const [phrase, setPhrase] = useState('');
   const [tapCount, setTapCount] = useState(0);
@@ -96,14 +98,23 @@ export default function HomeScreen({ navigate, onUnlockDev }) {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle={theme.statusBar === 'light' ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
       <LinearGradient
-        colors={['#FFF0F5', '#FFD6E8', '#FFAEC9', '#FF85A1']}
+        colors={theme.home}
         style={StyleSheet.absoluteFill}
         start={{ x: 0.2, y: 0 }}
         end={{ x: 0.8, y: 1 }}
       />
       <FloatingHearts count={8} />
+
+      {/* Botão de tema flutuante */}
+      <TouchableOpacity
+        onPress={onOpenThemes}
+        activeOpacity={0.8}
+        style={[styles.themeFab, { top: insets.top + 12, backgroundColor: theme.cardBg === '#FFFFFF' ? '#FFFFFF' : 'rgba(255,255,255,0.18)' }]}
+      >
+        <Text style={{ fontSize: 18 }}>🎨</Text>
+      </TouchableOpacity>
 
       <ScrollView
         style={styles.scroll}
@@ -117,9 +128,9 @@ export default function HomeScreen({ navigate, onUnlockDev }) {
               💖
             </Animated.Text>
           </TouchableOpacity>
-          <Text style={styles.greeting}>Oi, meu amor 🌸</Text>
-          <Text style={styles.title}>Para Mary</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.greeting, { color: theme.textMedium }]}>Oi, meu amor 🌸</Text>
+          <Text style={[styles.title, { color: theme.textDark }]}>Para Mary</Text>
+          <Text style={[styles.subtitle, { color: theme.textMedium }]}>
             Um universo criado com carinho,{'\n'}só para você.
           </Text>
         </Animated.View>
@@ -128,7 +139,7 @@ export default function HomeScreen({ navigate, onUnlockDev }) {
         <Animated.View style={{ opacity: counterOp, transform: [{ translateY: counterY }] }}>
           <View style={styles.counterCard}>
             <LinearGradient
-              colors={['#C0395A', '#E8527A', '#FF85A1']}
+              colors={theme.counter}
               style={StyleSheet.absoluteFill}
               borderRadius={24}
               start={{ x: 0, y: 0 }}
@@ -152,8 +163,8 @@ export default function HomeScreen({ navigate, onUnlockDev }) {
         {/* Daily Phrase */}
         <Animated.View style={{ opacity: phraseOp, transform: [{ translateY: phraseY }] }}>
           <View style={styles.phraseCard}>
-            <View style={styles.phraseTag}>
-              <Text style={styles.phraseTagText}>💌  Frase do Dia</Text>
+            <View style={[styles.phraseTag, { backgroundColor: theme.accent + '18' }]}>
+              <Text style={[styles.phraseTagText, { color: theme.accent }]}>💌  Frase do Dia</Text>
             </View>
             <Text style={styles.phraseText}>{phrase}</Text>
           </View>
@@ -161,13 +172,13 @@ export default function HomeScreen({ navigate, onUnlockDev }) {
 
         {/* Section label */}
         <Animated.View style={{ opacity: cardsOp, transform: [{ translateY: cardsY }] }}>
-          <Text style={styles.sectionTitle}>Feito com amor, só pra você 🌹</Text>
+          <Text style={[styles.sectionTitle, { color: theme.textDark }]}>Feito com amor, só pra você 🌹</Text>
 
           {/* Action Cards */}
           <View style={styles.grid}>
             <PressCard style={styles.card} onPress={() => navigate('letters')}>
               <LinearGradient
-                colors={['#C0395A', '#8B1E3F']}
+                colors={[theme.accent, theme.accentDark]}
                 style={styles.cardGrad}
                 borderRadius={20}
                 start={{ x: 0, y: 0 }}
@@ -219,8 +230,9 @@ export default function HomeScreen({ navigate, onUnlockDev }) {
           <View style={styles.aboutCard}>
             <Text style={styles.aboutEmoji}>🌸</Text>
             <Text style={styles.aboutText}>
-              Este aplicativo foi feito linha por linha pensando em cada detalhe que pudesse te fazer sorrir.
-              Em cada animação, em cada palavra, há amor de verdade.{'\n\n'}
+              Eu fiz esse app linha por linha, virando noites, pesquisando, errando e tentando
+              de novo — só pra te dar algo que ninguém mais tem.{'\n\n'}
+              Eu faço questão de fazer coisas de níveis absurdos por você. E isso aqui é só uma delas.{'\n\n'}
               Você merece isso e muito mais, Mary. 🌹
             </Text>
           </View>
@@ -236,6 +248,14 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingBottom: 30 },
+
+  themeFab: {
+    position: 'absolute', right: 16, zIndex: 20,
+    width: 42, height: 42, borderRadius: 21,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#C0395A', shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2, shadowRadius: 6, elevation: 6,
+  },
 
   header: { alignItems: 'center', marginBottom: 24, paddingTop: 8 },
   bigHeart: { fontSize: 68, marginBottom: 8 },

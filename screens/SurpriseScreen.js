@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     marginBottom: 20, position: 'relative',
   },
   glowRing: {
-    position: 'absolute', inset: -10, borderRadius: 36,
+    position: 'absolute', top: -10, left: -10, right: -10, bottom: -10, borderRadius: 36,
     borderWidth: 1.5, borderColor: 'rgba(255,182,193,0.3)',
   },
   boxGrad: { borderRadius: 28 },
