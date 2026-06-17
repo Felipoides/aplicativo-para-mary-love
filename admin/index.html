@@ -167,7 +167,7 @@
     <!-- ── TESTAR NOTIFICAÇÃO ── -->
     <div class="card">
       <h2>🔔 Notificação Bonita</h2>
-      <p class="hint">Aparece como banner lindo dentro do app + notificação do sistema. ⚠️ O app precisa estar <b>aberto</b> para ver o banner.</p>
+      <p class="hint">Envia uma notificação push direto pro celular da Mary — funciona mesmo com o app <b>fechado</b>! 🚀</p>
 
       <label>Templates prontos</label>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px" id="templateBtns"></div>
@@ -389,19 +389,47 @@
         </div>`).join('');
   }
 
-  // ── Testar notificação ──
+  // ── Enviar notificação push (funciona com app fechado) ──
   window.sendTestNotif = async function () {
     const title = document.getElementById('testTitle').value.trim() || '💖 Oi, Mary';
     const body = document.getElementById('testBody').value.trim();
     if (!body) { showStatus('testStatus', '⚠️ Escreva uma mensagem', 'err'); return; }
     try {
+      // Busca o push token salvo pelo app
+      const tokenSnap = await getDoc(doc(db, 'config', 'pushToken'));
+      if (!tokenSnap.exists() || !tokenSnap.data().token) {
+        showStatus('testStatus', '⚠️ O app ainda não registrou o push token. Peça pra Mary abrir o app uma vez primeiro.', 'err');
+        return;
+      }
+      const pushToken = tokenSnap.data().token;
+
+      // Envia via Expo Push API.
+      // A API do Expo não envia headers CORS, então uma chamada normal do
+      // navegador falha ("Failed to fetch"). Usamos mode:'no-cors' + text/plain:
+      // o Expo parseia o JSON do corpo mesmo assim. A resposta fica opaca
+      // (não dá pra ler), então é envio "fire-and-forget".
+      await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          to: pushToken,
+          sound: 'default',
+          title: title,
+          body: body,
+          channelId: 'love-messages',
+          priority: 'high',
+        }),
+      });
+      showStatus('testStatus', '✅ Notificação enviada! Vai chegar no celular da Mary mesmo com o app fechado 🚀', 'ok');
+
+      // Também salva no Firestore para o banner in-app (caso esteja aberto)
       const now = Date.now();
       await setDoc(doc(db, 'config', 'testNotification'), {
         title, body, id: now, createdAt: now, updatedAt: new Date().toISOString(),
       });
-      showStatus('testStatus', '✅ Enviada! Se o app estiver aberto, aparece em instantes.', 'ok');
     } catch (e) {
-      showStatus('testStatus', '❌ Erro ao enviar. Tente de novo.', 'err');
+      showStatus('testStatus', '❌ Erro ao enviar: ' + e.message, 'err');
     }
   };
 

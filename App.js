@@ -15,8 +15,8 @@ import DeveloperScreen from './screens/DeveloperScreen';
 import CreditsScreen from './screens/CreditsScreen';
 import ThemePickerModal from './components/ThemePickerModal';
 import InAppNotification from './components/InAppNotification';
-import { scheduleHourlyNotifications, setupNotifications, presentTestNotification } from './utils/notifications';
-import { syncFromFirebase, dismissSpecialMessage, listenForTestNotification } from './utils/firebase';
+import { scheduleHourlyNotifications, setupNotifications, presentTestNotification, registerForPushNotifications } from './utils/notifications';
+import { syncFromFirebase, dismissSpecialMessage, listenForTestNotification, savePushToken } from './utils/firebase';
 import { ThemeProvider, useTheme } from './utils/theme';
 
 const MARY_MESSAGES = [
@@ -223,6 +223,8 @@ function AppInner() {
 
     (async () => {
       await setupNotifications();
+      const pushToken = await registerForPushNotifications();
+      if (pushToken) await savePushToken(pushToken);
       const { intervalHours, specialMsg: msg } = await syncFromFirebase();
       scheduleHourlyNotifications(intervalHours ?? undefined);
       if (msg && msg.text) {

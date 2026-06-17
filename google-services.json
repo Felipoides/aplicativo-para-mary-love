@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "687041657673",
+    "project_id": "mary-love-2601d",
+    "storage_bucket": "mary-love-2601d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:687041657673:android:e08cbe4dd378df9a24b898",
+        "android_client_info": {
+          "package_name": "com.felpoinho.paramary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_zReUGqA88WfNlFUdz_4kozIjCooqTBc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

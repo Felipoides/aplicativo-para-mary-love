@@ -3,18 +3,6 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { getPhrases } from './storage';
 
-// ─────────────────────────────────────────────────────────────
-// Sistema de notificações — Mary Love
-//
-// Observações importantes:
-// • No Expo Go (SDK 53+) as notificações REMOTAS (push) foram removidas.
-//   As notificações LOCAIS continuam funcionando — é o que usamos aqui.
-// • A "notificação de teste" do painel admin chega via Firebase: o app
-//   escuta o Firestore e dispara uma notificação local (precisa estar aberto).
-// • Para push real com o app fechado seria necessário um build de
-//   desenvolvimento + Expo Push Tokens.
-// ─────────────────────────────────────────────────────────────
-
 const STORAGE_KEY = 'notif_interval_hours';
 const ANDROID_CHANNEL_ID = 'love-messages';
 const ACCENT = '#C0395A';
@@ -24,8 +12,9 @@ const ACCENT = '#C0395A';
 const QUIET_START = 23;
 const QUIET_END = 8;
 
-// Quantas notificações no máximo manter agendadas de uma vez.
-const MAX_SCHEDULED = 48;
+// Agenda 7 dias de notificações de uma vez para funcionar sem abrir o app.
+const SCHEDULE_DAYS = 7;
+const MAX_SCHEDULED = 300;
 
 const NOTIF_TITLES = [
   '💖 oi',
@@ -86,6 +75,31 @@ async function ensureAndroidChannel() {
 // Chamado uma vez quando o app abre.
 export async function setupNotifications() {
   await ensureAndroidChannel();
+}
+
+// Registra o push token do Expo e retorna para salvar no Firestore.
+const EAS_PROJECT_ID = '9eed06df-9cb0-4b81-b7c0-6f3c739f097a';
+
+export async function registerForPushNotifications() {
+  try {
+    const { status: existing } = await Notifications.getPermissionsAsync();
+    let finalStatus = existing;
+    if (existing !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') return null;
+
+    await ensureAndroidChannel();
+
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: EAS_PROJECT_ID,
+    });
+    return tokenData.data;
+  } catch (e) {
+    console.warn('Push token error:', e);
+    return null;
+  }
 }
 
 // ── Permissões ─────────────────────────────────────────────────
@@ -168,8 +182,8 @@ function isQuietHour(date) {
   return h >= QUIET_START || h < QUIET_END;
 }
 
-// Reagenda o lote de notificações das próximas 24h, uma para cada slot
-// do intervalo escolhido, com frases e títulos alternados.
+// Agenda notificações para os próximos SCHEDULE_DAYS dias.
+// Funciona em background — o sistema Android entrega mesmo com o app fechado.
 export async function scheduleHourlyNotifications(intervalHours) {
   try {
     await cancelAllNotifications();
@@ -186,15 +200,18 @@ export async function scheduleHourlyNotifications(intervalHours) {
     if (!phrases || phrases.length === 0) return false;
 
     const now = new Date();
-    const totalSlots = Math.min(Math.floor(24 / hours), MAX_SCHEDULED);
+    const totalHours = SCHEDULE_DAYS * 24;
+    const totalSlots = Math.min(Math.floor(totalHours / hours), MAX_SCHEDULED);
     let scheduled = 0;
 
     for (let i = 1; i <= totalSlots; i++) {
       const fireTime = new Date(now.getTime() + i * hours * 60 * 60 * 1000);
       if (isQuietHour(fireTime)) continue;
 
-      const phrase = phrases[(now.getHours() + i) % phrases.length];
-      const title = NOTIF_TITLES[(now.getHours() + i) % NOTIF_TITLES.length];
+      const phraseIndex = (i - 1) % phrases.length;
+      const titleIndex = (i - 1) % NOTIF_TITLES.length;
+      const phrase = phrases[phraseIndex];
+      const title = NOTIF_TITLES[titleIndex];
 
       await Notifications.scheduleNotificationAsync({
         content: {

@@ -8,3 +8,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .DS_Store
+
+# Credenciais sensíveis — NUNCA commitar
+# (google-services.json NÃO entra aqui: é necessário no build do APK e não é segredo)
+fcm-service-account.json
+*-firebase-adminsdk-*.json

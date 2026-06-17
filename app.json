@@ -24,6 +24,7 @@
     },
     "android": {
       "package": "com.felpoinho.paramary",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0D0008"

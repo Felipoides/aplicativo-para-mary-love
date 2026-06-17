@@ -55,6 +55,12 @@ async function writeDoc(path, data) {
   }
 }
 
+// Salva o push token do Expo no Firestore para o painel admin usar.
+export async function savePushToken(token) {
+  if (!token) return;
+  await writeDoc('config/pushToken', { token });
+}
+
 // Sincroniza tudo ao abrir o app.
 // Retorna o que foi aplicado para uso imediato (ex: reagendar notificações).
 export async function syncFromFirebase() {
