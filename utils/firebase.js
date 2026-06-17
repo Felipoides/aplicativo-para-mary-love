@@ -1,5 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import {
+  getFirestore, initializeFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot,
+} from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const FIREBASE_CONFIG = {
@@ -17,7 +19,13 @@ function getDb() {
   if (db) return db;
   try {
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
-    db = getFirestore(app);
+    // Long polling deixa o realtime (onSnapshot) confiável no React Native.
+    try {
+      db = initializeFirestore(app, { experimentalForceLongPolling: true });
+    } catch (_) {
+      // Já inicializado (ex: hot reload) — reaproveita.
+      db = getFirestore(app);
+    }
   } catch (_) {}
   return db;
 }
@@ -101,4 +109,55 @@ export async function getSpecialMessage() {
 // Marca mensagem especial como vista (para não mostrar de novo)
 export async function dismissSpecialMessage() {
   await AsyncStorage.removeItem('special_message');
+}
+
+// ── Notificação de teste (painel admin → celular) ──────────────
+// O admin escreve em config/testNotification e o app, escutando em tempo
+// real, dispara uma notificação local. Só funciona com o app aberto.
+const TEST_SEEN_KEY = 'last_test_notif_id';
+const TEST_MAX_AGE_MS = 5 * 60 * 1000; // ignora testes com mais de 5 min
+
+let testUnsub = null;
+
+export function listenForTestNotification(onTest) {
+  try {
+    const firestore = getDb();
+    if (!firestore) return () => {};
+
+    // Evita listeners duplicados (ex: hot reload).
+    if (testUnsub) { testUnsub(); testUnsub = null; }
+
+    const ref = doc(firestore, 'config', 'testNotification');
+    testUnsub = onSnapshot(
+      ref,
+      async (snap) => {
+        try {
+          if (!snap.exists()) return;
+          const data = snap.data();
+          if (!data || data.id == null) return;
+
+          const id = String(data.id);
+          const lastId = await AsyncStorage.getItem(TEST_SEEN_KEY);
+          if (id === lastId) return; // já tratado
+
+          await AsyncStorage.setItem(TEST_SEEN_KEY, id);
+
+          // Só dispara testes recentes — assim um teste antigo não aparece
+          // do nada quando a Mary reabre o app dias depois.
+          const createdAt = Number(data.createdAt) || 0;
+          if (createdAt && Date.now() - createdAt > TEST_MAX_AGE_MS) return;
+
+          onTest({
+            title: data.title || '💖 Mensagem de teste',
+            body: data.body || 'Funcionou! 💕',
+          });
+        } catch (_) {}
+      },
+      () => {}
+    );
+
+    return () => { if (testUnsub) { testUnsub(); testUnsub = null; } };
+  } catch (_) {
+    return () => {};
+  }
 }

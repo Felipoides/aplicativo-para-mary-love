@@ -84,6 +84,16 @@
     #login { text-align: center; }
     #app { display: none; }
     .section-divider { height: 1px; background: rgba(255,182,193,0.1); margin: 4px 0 16px; }
+    .tpl-btn {
+      padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.3);
+      background: rgba(212,175,55,0.08); color: #FFD700; font-size: 11px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .tpl-btn:hover { background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.6); }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(1.15); }
+    }
   </style>
 </head>
 <body>
@@ -152,6 +162,49 @@
       <button class="btn btn-gold" onclick="saveInterval()" style="margin-top:8px">💾 Salvar Intervalo</button>
       <div id="notifStatus" class="status"></div>
       <div class="item-list" id="phraseList"></div>
+    </div>
+
+    <!-- ── TESTAR NOTIFICAÇÃO ── -->
+    <div class="card">
+      <h2>🔔 Notificação Bonita</h2>
+      <p class="hint">Aparece como banner lindo dentro do app + notificação do sistema. ⚠️ O app precisa estar <b>aberto</b> para ver o banner.</p>
+
+      <label>Templates prontos</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px" id="templateBtns"></div>
+
+      <label>Título</label>
+      <input type="text" id="testTitle" value="💖 Oi, Mary" oninput="updateNotifPreview()" />
+
+      <label>Mensagem</label>
+      <textarea id="testBody" placeholder="Escreva a notificação..." style="min-height:60px" oninput="updateNotifPreview()">Te amo! 🌹</textarea>
+
+      <!-- Preview visual -->
+      <div id="notifPreview" style="margin-top:14px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,182,193,0.15);display:none">
+        <div style="background:linear-gradient(135deg,#1A0010,#3B0A20,#5C1A35);padding:14px 16px;position:relative;overflow:hidden">
+          <div style="position:absolute;inset:0;background:#C0395A;opacity:0.08;border-radius:16px"></div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative">
+              💖
+              <div style="position:absolute;inset:-4px;border-radius:50%;background:#C0395A;opacity:0.2;animation:pulse-glow 2s infinite"></div>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div id="prevTitle" style="font-size:13px;font-weight:800;color:#FFF;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">💖 Oi, Mary</div>
+              <div id="prevBody" style="font-size:12px;color:rgba(255,200,220,0.9);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">Te amo! 🌹</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,182,193,0.1)">
+            <div style="display:flex;align-items:center;gap:3px">
+              <span style="font-size:9px">✨</span>
+              <span style="font-size:10px;color:rgba(255,182,193,0.5);font-weight:600">do Matheus</span>
+              <span style="font-size:9px">✨</span>
+            </div>
+            <span style="font-size:9px;color:rgba(255,182,193,0.3);font-style:italic">preview</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-gold" onclick="sendTestNotif()" style="margin-top:14px">💌 Enviar Notificação Bonita</button>
+      <div id="testStatus" class="status"></div>
     </div>
 
     <!-- ── SURPRESAS ── -->
@@ -336,6 +389,22 @@
         </div>`).join('');
   }
 
+  // ── Testar notificação ──
+  window.sendTestNotif = async function () {
+    const title = document.getElementById('testTitle').value.trim() || '💖 Oi, Mary';
+    const body = document.getElementById('testBody').value.trim();
+    if (!body) { showStatus('testStatus', '⚠️ Escreva uma mensagem', 'err'); return; }
+    try {
+      const now = Date.now();
+      await setDoc(doc(db, 'config', 'testNotification'), {
+        title, body, id: now, createdAt: now, updatedAt: new Date().toISOString(),
+      });
+      showStatus('testStatus', '✅ Enviada! Se o app estiver aberto, aparece em instantes.', 'ok');
+    } catch (e) {
+      showStatus('testStatus', '❌ Erro ao enviar. Tente de novo.', 'err');
+    }
+  };
+
   // ── Surpresas ──
   const BADGE = { frase: 'badge-frase', motivacao: 'badge-motivacao', desafio: 'badge-desafio', memoria: 'badge-memoria', segredo: 'badge-segredo' };
   const LABELS = { frase: 'Frase', motivacao: 'Motivação', desafio: 'Desafio', memoria: 'Memória', segredo: 'Segredo' };
@@ -384,6 +453,52 @@
     await writeDoc('config', 'startDate', { date });
     showStatus('dateStatus', '✅ Data salva! Aplica na próxima abertura.', 'ok');
   };
+
+  // ── Templates de notificação ──
+  const NOTIF_TEMPLATES = [
+    { label: '💖 Amor', title: '💖 Oi, meu amor', body: 'Só passando pra dizer que te amo demais. Você é tudo pra mim. 🌹' },
+    { label: '🌸 Saudade', title: '🌸 Tô com saudade', body: 'Queria tá pertinho de você agora... Tô contando os minutos. 💕' },
+    { label: '✨ Elogio', title: '✨ Sabia que...', body: 'Você é a pessoa mais linda e incrível que eu conheço. Tenho muita sorte. 🦋' },
+    { label: '🌹 Romântico', title: '🌹 Pensando em você', body: 'Cada segundo do meu dia fica melhor quando lembro que você existe na minha vida. 💫' },
+    { label: '💌 Carinhoso', title: '💌 Ei, Mary', body: 'Você merecia um abraço agora. Como não dá, recebe esse carinho virtual. Te amo! 🤗' },
+    { label: '🔥 Intenso', title: '🔥 Preciso dizer', body: 'Eu te amo de um jeito que nem cabe em palavras. Você é minha pessoa favorita no mundo inteiro. ❤️‍🔥' },
+    { label: '☀️ Bom dia', title: '☀️ Bom dia, princesa', body: 'Que seu dia seja tão lindo quanto você. Tô aqui torcendo por ti. 💛' },
+    { label: '🌙 Boa noite', title: '🌙 Boa noite, amor', body: 'Dorme bem, meu anjo. Sonha com coisas lindas... e comigo. 💜' },
+  ];
+
+  function initTemplates() {
+    const container = document.getElementById('templateBtns');
+    NOTIF_TEMPLATES.forEach((t, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'tpl-btn';
+      btn.textContent = t.label;
+      btn.onclick = () => applyTemplate(i);
+      container.appendChild(btn);
+    });
+  }
+
+  function applyTemplate(i) {
+    const t = NOTIF_TEMPLATES[i];
+    document.getElementById('testTitle').value = t.title;
+    document.getElementById('testBody').value = t.body;
+    updateNotifPreview();
+  }
+
+  window.updateNotifPreview = function () {
+    const title = document.getElementById('testTitle').value.trim();
+    const body = document.getElementById('testBody').value.trim();
+    const preview = document.getElementById('notifPreview');
+    if (title || body) {
+      document.getElementById('prevTitle').textContent = title || '💖 Notificação';
+      document.getElementById('prevBody').textContent = body || '';
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+  };
+
+  initTemplates();
+  updateNotifPreview();
 
   // Enter no login
   document.getElementById('password').addEventListener('keydown', e => {

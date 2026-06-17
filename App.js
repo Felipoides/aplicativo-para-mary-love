@@ -12,9 +12,11 @@ import GamesHubScreen from './screens/GamesHubScreen';
 import LoveLettersScreen from './screens/LoveLettersScreen';
 import SurpriseScreen from './screens/SurpriseScreen';
 import DeveloperScreen from './screens/DeveloperScreen';
+import CreditsScreen from './screens/CreditsScreen';
 import ThemePickerModal from './components/ThemePickerModal';
-import { scheduleHourlyNotifications } from './utils/notifications';
-import { syncFromFirebase, dismissSpecialMessage } from './utils/firebase';
+import InAppNotification from './components/InAppNotification';
+import { scheduleHourlyNotifications, setupNotifications, presentTestNotification } from './utils/notifications';
+import { syncFromFirebase, dismissSpecialMessage, listenForTestNotification } from './utils/firebase';
 import { ThemeProvider, useTheme } from './utils/theme';
 
 const MARY_MESSAGES = [
@@ -120,6 +122,7 @@ const TABS = [
   { id: 'letters',   emoji: '💌', label: 'Cartas' },
   { id: 'surprises', emoji: '💝', label: 'Surpresas' },
   { id: 'mary',      emoji: '🌹', label: 'Mary' },
+  { id: 'credits',   emoji: '👨‍💻', label: 'Créditos' },
 ];
 
 function TabItem({ tab, active, onPress, slotWidth, accent }) {
@@ -152,13 +155,14 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const indicatorX = useRef(new Animated.Value(0)).current;
-  const TAB_SLOT_W = (width - 40) / 5;
+  const TAB_SLOT_W = (width - 40) / 6;
 
   const getTabIndex = (id) => {
     if (id === 'home')      return 0;
     if (id === 'letters')   return 1;
     if (id === 'surprises') return 3;
     if (id === 'mary')      return 4;
+    if (id === 'credits')   return 5;
     return 0;
   };
 
@@ -194,6 +198,7 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
 
         <TabItem tab={TABS[2]} active={activeTab === 'surprises'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('surprises')} />
         <TabItem tab={TABS[3]} active={activeTab === 'mary'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('mary')} />
+        <TabItem tab={TABS[4]} active={activeTab === 'credits'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('credits')} />
       </View>
     </View>
   );
@@ -208,12 +213,16 @@ function AppInner() {
   const [devMode, setDevMode] = useState(false);
   const [showThemes, setShowThemes] = useState(false);
   const [specialMsg, setSpecialMsg] = useState(null);
+  const [inAppNotif, setInAppNotif] = useState(null);
   const screenFade = useRef(new Animated.Value(1)).current;
   const msgScale = useRef(new Animated.Value(0.85)).current;
   const msgOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    let unsubscribeTest = () => {};
+
     (async () => {
+      await setupNotifications();
       const { intervalHours, specialMsg: msg } = await syncFromFirebase();
       scheduleHourlyNotifications(intervalHours ?? undefined);
       if (msg && msg.text) {
@@ -223,7 +232,15 @@ function AppInner() {
           Animated.timing(msgOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
         ]).start();
       }
+
+      // Escuta notificações de teste enviadas pelo painel admin.
+      unsubscribeTest = listenForTestNotification(({ title, body }) => {
+        presentTestNotification(title, body);
+        setInAppNotif({ title, body });
+      });
     })();
+
+    return () => unsubscribeTest();
   }, []);
 
   const navigateTo = (tab) => {
@@ -265,6 +282,7 @@ function AppInner() {
       case 'letters':   return <LoveLettersScreen />;
       case 'surprises': return <SurpriseScreen />;
       case 'mary':      return <MaryScreen onOpenThemes={() => setShowThemes(true)} />;
+      case 'credits':   return <CreditsScreen />;
       default:          return (
         <HomeScreen
           navigate={(screen) => {
@@ -327,6 +345,8 @@ function AppInner() {
           <Text style={styles.devFabText}>⚙️</Text>
         </TouchableOpacity>
       )}
+
+      <InAppNotification notification={inAppNotif} onDismiss={() => setInAppNotif(null)} />
     </View>
   );
 }
