@@ -99,6 +99,13 @@ export async function syncFromFirebase() {
     await AsyncStorage.removeItem('special_message');
   }
 
+  // Mensagem do Bot do Amor: pega a mais recente do histórico
+  const botSnap = await fetchDoc('config/botHistory');
+  if (botSnap && Array.isArray(botSnap.list) && botSnap.list.length > 0) {
+    const latest = botSnap.list[0];
+    await AsyncStorage.setItem('bot_daily_message', JSON.stringify(latest));
+  }
+
   return { intervalHours, specialMsg };
 }
 

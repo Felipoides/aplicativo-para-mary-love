@@ -94,6 +94,31 @@
       0%, 100% { opacity: 0.15; transform: scale(1); }
       50% { opacity: 0.35; transform: scale(1.15); }
     }
+    .bot-msg-card {
+      background: linear-gradient(135deg, rgba(192,57,90,0.15), rgba(212,175,55,0.1));
+      border: 1px solid rgba(212,175,55,0.3); border-radius: 14px;
+      padding: 16px; margin-top: 12px; position: relative; overflow: hidden;
+    }
+    .bot-msg-card::before {
+      content: ''; position: absolute; top: -20px; right: -20px;
+      width: 80px; height: 80px; border-radius: 50%;
+      background: rgba(212,175,55,0.08);
+    }
+    .bot-msg-text { font-size: 14px; color: #FFD6E4; line-height: 1.7; font-style: italic; }
+    .bot-msg-meta { font-size: 11px; color: rgba(255,182,193,0.5); margin-top: 8px; }
+    .bot-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .bot-actions .btn { flex: 1; min-width: 120px; font-size: 12px; padding: 10px; }
+    .history-item {
+      font-size: 12px; color: rgba(255,182,193,0.6); padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,182,193,0.08); line-height: 1.5;
+    }
+    .history-date { font-size: 10px; color: rgba(212,175,55,0.6); font-weight: 700; }
+    .bot-status-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: #5EC89A; margin-right: 6px; animation: pulse-glow 2s infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .spin { animation: spin 1s linear infinite; display: inline-block; }
   </style>
 </head>
 <body>
@@ -136,6 +161,28 @@
         <button class="btn btn-clear btn-sm" style="flex-shrink:0;padding:12px 16px" onclick="clearSpecialMsg()">✕ Limpar</button>
       </div>
       <div id="msgStatus" class="status"></div>
+    </div>
+
+    <!-- ── BOT DO AMOR ── -->
+    <div class="card">
+      <h2>🤖 Bot do Amor <span class="bot-status-dot"></span></h2>
+      <p class="hint">Gera uma mensagem carinhosa e romântica nova a cada 24h, sem repetir. Funciona como uma IA do amor!</p>
+
+      <div id="botMsgArea">
+        <p class="hint" style="text-align:center;margin-top:12px"><span class="spin">⏳</span> Carregando mensagem do dia...</p>
+      </div>
+
+      <div class="bot-actions" id="botActions" style="display:none">
+        <button class="btn btn-primary" onclick="useBotAsSpecial()">💌 Usar como Msg Especial</button>
+        <button class="btn btn-gold" onclick="useBotAsNotif()">🔔 Enviar como Notificação</button>
+        <button class="btn btn-clear btn-sm" onclick="generateNewBot()" style="flex:0;padding:10px 14px" title="Gerar outra">🔄</button>
+      </div>
+      <div id="botStatus" class="status"></div>
+
+      <details style="margin-top:14px">
+        <summary style="font-size:12px;color:rgba(255,182,193,0.5);cursor:pointer;user-select:none">📜 Últimas mensagens geradas</summary>
+        <div id="botHistory" style="max-height:200px;overflow-y:auto;margin-top:6px"></div>
+      </details>
     </div>
 
     <!-- ── NOTIFICAÇÕES ── -->
@@ -319,6 +366,7 @@
     }
 
     renderPhrases(); renderSurprises();
+    loadBotMessage();
   }
 
   // ── Mensagem especial ──
@@ -523,6 +571,229 @@
     } else {
       preview.style.display = 'none';
     }
+  };
+
+  // ── Bot do Amor — Gerador de mensagens carinhosas ──────────────
+  // Tom: direto, real, cru. Tipo "mesmo naquele inferno te ver é minha parte favorita do dia".
+  const BOT_OPENINGS = [
+    'O dia tava uma merda, mas aí eu lembrei de você e',
+    'Tava no meio do caos e do nada pensei:',
+    'Não vou mentir, tá tudo difícil, mas',
+    'O mundo tá um inferno, mas sabe o que me salva?',
+    'Podia tá tudo desabando e mesmo assim',
+    'No meio de toda essa loucura,',
+    'Tava exausto, sem paciência pra nada, e aí lembrei que',
+    'Mesmo quando tudo parece dar errado,',
+    'Eu sei que o dia foi pesado, mas',
+    'Não importa o quão fodido o dia tá,',
+    'Pode chover, pode dar merda, pode ser o pior dia, mas',
+    'Tava quase surtando e aí me veio na cabeça:',
+    'Sabe quando parece que nada vai dar certo? Pois é, mas',
+    'O dia podia ser um lixo completo e ainda assim',
+    'Olha, eu tô cansado pra caralho, mas nunca cansado de saber que',
+    'No meio do trânsito, da correria, do estresse,',
+    'Quando tudo parece desmoronar, uma coisa me segura:',
+    'Pode ser segunda-feira, pode ser o pior dia da semana, mas',
+    'Eu nem sei como explicar, mas mesmo no pior cenário,',
+    'Tava a ponto de mandar tudo pro inferno, mas aí pensei:',
+    'O dia podia ter sido melhor? Podia. Mas ainda assim',
+    'Sabe aqueles dias que você quer sumir? Pois é, mesmo nesses dias',
+    'Tava olhando pro nada, cansado de tudo, e pensei:',
+    'Não tem um dia ruim que não fique menos ruim quando eu lembro que',
+    'Podem falar o que quiser, o mundo pode desabar, mas',
+  ];
+
+  const BOT_MIDDLES = [
+    'te ver ainda é a melhor parte do meu dia, e nada muda isso.',
+    'você continua sendo a única coisa que faz sentido nessa bagunça toda.',
+    'eu olho pra você e o resto some. Sério, some tudo.',
+    'ter você do meu lado faz qualquer inferno virar suportável.',
+    'sua risada sozinha já vale mais que o dia inteiro.',
+    'você me lembra por que vale a pena aguentar tudo isso.',
+    'eu prefiro um dia difícil com você do que um dia fácil sem.',
+    'você é a única pessoa que me faz esquecer que tava tudo uma merda.',
+    'eu olho pra você e penso "é, valeu a pena o dia".',
+    'mesmo cansada, estressada, de mau humor — você ainda é a coisa mais bonita que eu já vi.',
+    'você transforma o resto do barulho em silêncio. Do bom.',
+    'nenhum dia é tão ruim que não melhore quando eu falo contigo.',
+    'eu não preciso de mais nada quando você tá por perto. Sério.',
+    'você é meu lugar de paz no meio de todo esse caos.',
+    'eu largo tudo pra ficar cinco minutos com você e não me arrependo.',
+    'te ter é o que me faz levantar quando eu quero desistir de tudo.',
+    'você me segura no lugar sem nem perceber. E eu sou grato pra caralho por isso.',
+    'seu sorriso no meio de um dia horrível é tipo encontrar água no deserto.',
+    'eu aguento qualquer coisa sabendo que no final do dia ainda tenho você.',
+    'você é o motivo de eu não ter pirado ainda, e isso não é piada.',
+    'te ver feliz me conserta coisas que eu nem sabia que tavam quebradas.',
+    'eu poderia reclamar do dia inteiro, mas contigo ele sempre termina bem.',
+    'o caos lá fora não importa quando eu tô contigo. Simples assim.',
+    'você faz o dia mais pesado parecer leve só de existir do meu lado.',
+    'eu troco o mundo inteiro por mais um minuto do seu lado e ainda saio ganhando.',
+    'não existe dia ruim o suficiente que te ver não conserte.',
+    'você é a prova de que coisa boa existe, mesmo quando tudo diz o contrário.',
+    'eu tô exausto de tudo, menos de te amar. Disso eu nunca canso.',
+    'mesmo naquele inferno, te ver é minha parte favorita do dia.',
+    'eu acordo pra luta todo dia, mas é por você que vale a pena lutar.',
+  ];
+
+  const BOT_CLOSINGS = [
+    'É isso. Sem enfeite. Te amo. ❤️',
+    'Não precisa de mais nada. Só você. 💕',
+    'E se o dia for uma merda de novo amanhã, essa parte não muda. 🌹',
+    'E quem disser o contrário pode vir falar comigo. 😏❤️',
+    'Isso aqui é inegociável. Te amo. Ponto. 💖',
+    'Vou repetir até você cansar de ouvir. Spoiler: eu não canso. 🔥',
+    'Lembra disso no próximo dia difícil. Te amo. ✨',
+    'Amanhã vai ser a mesma coisa. E depois de amanhã. E sempre. 💪',
+    'Você é meu lugar. Sempre vai ser. 💗',
+    'Pode confiar nisso como confia em respirar. Te amo. 🫶',
+    'Obrigado por aguentar o tranco comigo. Te amo demais. 🌺',
+    'Nunca vou cansar disso. Nunca. Te amo! 🔥',
+    'Te escolhi no caos e te escolheria de novo mil vezes. 💫',
+    'Vai dormir sabendo que alguém aqui te ama de verdade. 🌙',
+    'Isso é só o começo. O melhor tá vindo. Junto. 🚀',
+    'E quando tudo der errado de novo, lembra que isso aqui tá de pé. ❤️‍🔥',
+    'Foda-se o resto. Te amo e acabou. 💖',
+    'Não é discurso bonito. É real. Te amo. 🖤',
+  ];
+
+  const BOT_TITLES = [
+    '💖 Mensagem do Amor',
+    '🌹 Carinho do Dia',
+    '💌 Recadinho Especial',
+    '✨ Palavras do Coração',
+    '💕 Declaração Diária',
+    '🦋 Pensamento Carinhoso',
+    '💗 Do Fundo do Coração',
+    '🌸 Flor do Dia',
+  ];
+
+  function hashDate(dateStr) {
+    let h = 0;
+    for (let i = 0; i < dateStr.length; i++) {
+      h = ((h << 5) - h + dateStr.charCodeAt(i)) | 0;
+    }
+    return Math.abs(h);
+  }
+
+  function generateBotMessage(dateStr, offset = 0) {
+    const seed = hashDate(dateStr + ':' + offset);
+    const a = seed % BOT_OPENINGS.length;
+    const b = (seed * 31 + 7) % BOT_MIDDLES.length;
+    const c = (seed * 17 + 13) % BOT_CLOSINGS.length;
+    const t = (seed * 11 + 3) % BOT_TITLES.length;
+    const text = `${BOT_OPENINGS[a]} ${BOT_MIDDLES[b]} ${BOT_CLOSINGS[c]}`;
+    return { title: BOT_TITLES[t], text, date: dateStr };
+  }
+
+  let currentBotMsg = null;
+  let botHistory = [];
+  let botOffset = 0;
+
+  async function loadBotMessage() {
+    const today = new Date().toISOString().slice(0, 10);
+
+    const histSnap = await getDoc(doc(db, 'config', 'botHistory'));
+    botHistory = histSnap.exists() && Array.isArray(histSnap.data().list) ? histSnap.data().list : [];
+
+    const existing = botHistory.find(h => h.date === today);
+    if (existing) {
+      currentBotMsg = existing;
+    } else {
+      let attempts = 0;
+      let msg;
+      do {
+        msg = generateBotMessage(today, attempts);
+        const isDuplicate = botHistory.some(h => h.text === msg.text);
+        if (!isDuplicate) break;
+        attempts++;
+      } while (attempts < 50);
+
+      currentBotMsg = msg;
+      botHistory.unshift({ ...msg, generatedAt: new Date().toISOString() });
+      if (botHistory.length > 30) botHistory = botHistory.slice(0, 30);
+      await writeDoc('config', 'botHistory', { list: botHistory });
+    }
+
+    renderBotMessage();
+    renderBotHistory();
+  }
+
+  function renderBotMessage() {
+    if (!currentBotMsg) return;
+    document.getElementById('botMsgArea').innerHTML = `
+      <div class="bot-msg-card">
+        <div style="font-size:11px;color:rgba(212,175,55,0.8);font-weight:700;margin-bottom:8px;letter-spacing:0.5px">${currentBotMsg.title}</div>
+        <div class="bot-msg-text">"${currentBotMsg.text}"</div>
+        <div class="bot-msg-meta">📅 ${formatBotDate(currentBotMsg.date)} · 🤖 Gerada automaticamente</div>
+      </div>`;
+    document.getElementById('botActions').style.display = 'flex';
+  }
+
+  function renderBotHistory() {
+    const el = document.getElementById('botHistory');
+    if (botHistory.length === 0) {
+      el.innerHTML = '<p class="hint" style="text-align:center;padding:8px">Nenhuma mensagem ainda</p>';
+      return;
+    }
+    el.innerHTML = botHistory.map(h => `
+      <div class="history-item">
+        <span class="history-date">${formatBotDate(h.date)}</span><br/>
+        "${h.text.substring(0, 80)}${h.text.length > 80 ? '...' : ''}"
+      </div>`).join('');
+  }
+
+  function formatBotDate(dateStr) {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  window.useBotAsSpecial = async function () {
+    if (!currentBotMsg) return;
+    document.getElementById('msgTitle').value = currentBotMsg.title;
+    document.getElementById('msgText').value = currentBotMsg.text;
+    document.getElementById('msgEmoji').value = '💖';
+    await writeDoc('config', 'specialMessage', {
+      text: currentBotMsg.text,
+      title: currentBotMsg.title,
+      emoji: '💖',
+    });
+    previewMsg();
+    showStatus('botStatus', '✅ Mensagem do bot salva como Mensagem Especial!', 'ok');
+  };
+
+  window.useBotAsNotif = async function () {
+    if (!currentBotMsg) return;
+    document.getElementById('testTitle').value = currentBotMsg.title;
+    document.getElementById('testBody').value = currentBotMsg.text;
+    updateNotifPreview();
+    await sendTestNotif();
+    showStatus('botStatus', '✅ Mensagem do bot enviada como notificação!', 'ok');
+  };
+
+  window.generateNewBot = async function () {
+    botOffset++;
+    const today = new Date().toISOString().slice(0, 10);
+    let msg;
+    let attempts = 0;
+    do {
+      msg = generateBotMessage(today, botOffset + attempts);
+      const isDuplicate = botHistory.some(h => h.text === msg.text);
+      if (!isDuplicate) break;
+      attempts++;
+    } while (attempts < 50);
+
+    currentBotMsg = msg;
+    const existingIdx = botHistory.findIndex(h => h.date === today);
+    if (existingIdx >= 0) botHistory[existingIdx] = { ...msg, generatedAt: new Date().toISOString() };
+    else botHistory.unshift({ ...msg, generatedAt: new Date().toISOString() });
+    if (botHistory.length > 30) botHistory = botHistory.slice(0, 30);
+    await writeDoc('config', 'botHistory', { list: botHistory });
+
+    renderBotMessage();
+    renderBotHistory();
+    showStatus('botStatus', '🔄 Nova mensagem gerada!', 'ok');
   };
 
   initTemplates();

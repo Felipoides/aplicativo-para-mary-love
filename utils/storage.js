@@ -33,6 +33,14 @@ export const savePhrases = async (phrases) =>
   AsyncStorage.setItem('phrases', JSON.stringify(phrases));
 
 export const getTodayPhrase = async () => {
+  try {
+    const raw = await AsyncStorage.getItem('bot_daily_message');
+    if (raw) {
+      const bot = JSON.parse(raw);
+      const today = new Date().toISOString().slice(0, 10);
+      if (bot.text && bot.date === today) return bot.text;
+    }
+  } catch (_) {}
   const phrases = await getPhrases();
   const dayOfYear = Math.floor(
     (new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)

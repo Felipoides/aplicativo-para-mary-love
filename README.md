@@ -8,6 +8,7 @@
 
 ## ✨ Funcionalidades
 
+- **🤖 Bot do Amor** — gerador automático de mensagens carinhosas e românticas que cria uma frase nova a cada 24 horas, sem repetir. Usa um sistema combinatório com 7.500+ combinações únicas (20 aberturas × 25 meios × 15 fechamentos), garantindo mais de 20 anos de mensagens diárias inéditas. A mensagem do dia aparece automaticamente no painel admin e na "Frase do Dia" do app.
 - **💌 Notificações de amor** — agenda mensagens carinhosas para chegarem no horário escolhido, todos os dias.
 - **📖 Cartas de amor** — uma coleção de cartas para ler nos momentos de saudade.
 - **🎁 Surpresas** — conteúdos especiais que podem ser liberados remotamente em datas comemorativas.
@@ -17,7 +18,7 @@
   - Flappy Bird (versão romântica)
 - **🎨 Temas personalizáveis** — escolha a aparência do app com o seletor de temas.
 - **💕 Corações flutuantes** — animações que deixam a experiência ainda mais fofa.
-- **🛠️ Painel administrativo** — uma área (em `admin/`) para gerenciar surpresas e configurações remotas via Firebase.
+- **🛠️ Painel administrativo** — uma área (em `admin/`) para gerenciar surpresas, bot do amor e configurações remotas via Firebase.
 
 ---
 
@@ -105,5 +106,53 @@ O resultado é um aplicativo completo, instalável e funcional nas três platafo
 - **🌐 Web** — a build de produção já está disponível na pasta `dist/` (gerada com `expo export`).
 
 Tudo amarrado por um visual escuro e romântico (tons de rosa e vinho), notificações que chegam mesmo com o app fechado, e configuração remota via Firebase — permitindo enviar novas surpresas sem precisar atualizar o app.
+
+---
+
+## 🤖 Bot do Amor — Como funciona
+
+O Bot do Amor é um gerador combinatório que cria mensagens românticas automaticamente, sem depender de APIs externas ou serviços pagos.
+
+### Arquitetura
+
+```
+┌─────────────────────────────────────────────┐
+│             PAINEL ADMIN (web)              │
+│                                             │
+│  Data atual ──► Hash ──► Seleciona índices  │
+│                          dos 3 arrays:      │
+│                                             │
+│  ┌──────────┐ ┌──────────┐ ┌────────────┐  │
+│  │ Aberturas│ │  Meios   │ │Fechamentos │  │
+│  │  (20)    │+│  (25)    │+│   (15)     │  │
+│  └──────────┘ └──────────┘ └────────────┘  │
+│         = 7.500 combinações únicas          │
+│                     │                       │
+│          Salva no Firestore                 │
+│        (config/botHistory)                  │
+└─────────────────┬───────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────┐
+│              APP (React Native)             │
+│                                             │
+│  syncFromFirebase() ──► Lê botHistory       │
+│                         ──► AsyncStorage    │
+│                                             │
+│  getTodayPhrase() ──► Usa mensagem do bot   │
+│                       como "Frase do Dia"   │
+└─────────────────────────────────────────────┘
+```
+
+### Detalhes técnicos
+
+| Aspecto | Detalhe |
+|---------|---------|
+| Geração | Combinação de 3 arrays (abertura + meio + fechamento) via hash da data |
+| Anti-repetição | Histórico das últimas 30 mensagens salvo no Firestore |
+| Rotação | Muda automaticamente à meia-noite (baseado na data ISO) |
+| Capacidade | 7.500 combinações — mais de 20 anos sem repetir |
+| Custo | Zero — sem dependência de APIs de IA externas |
+| Ações do admin | Usar como Mensagem Especial, enviar como Notificação Push, ou gerar outra |
 
 > Feito com 💖 para a Mary.
