@@ -5,297 +5,348 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>💖 Painel Mary</title>
   <style>
+    :root {
+      --bg: #120c16; --sidebar: #1b1220; --card: #24192a; --raised: #2d2034;
+      --rose: #f15b8a; --rose-soft: #52263a; --gold: #f4c26b;
+      --text: #fff8fb; --muted: #bfafbe; --border: #3b2a42;
+      --success: #65d69a; --danger: #ff7a8a; --shadow: 0 18px 60px rgba(0,0,0,.28);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0A0515, #1A0A20, #2C1654, #3D1021);
-      min-height: 100vh; color: #FFD6E4; padding: 20px;
-    }
-    .container { max-width: 540px; margin: 0 auto; }
-    h1 { font-size: 26px; font-weight: 900; color: #FFD700; text-align: center; margin-bottom: 4px; }
-    .subtitle { text-align: center; color: rgba(255,182,193,0.7); font-size: 13px; margin-bottom: 28px; }
-    .card {
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,182,193,0.15);
-      border-radius: 16px; padding: 20px; margin-bottom: 16px;
-    }
-    .card h2 { font-size: 15px; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-    label { font-size: 12px; color: rgba(255,182,193,0.7); display: block; margin-bottom: 6px; margin-top: 10px; }
-    select, input, textarea {
-      width: 100%; padding: 10px 14px;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.25);
-      border-radius: 10px; color: #FFFFFF; font-size: 14px; outline: none;
-      transition: border-color 0.2s;
-    }
-    select:focus, input:focus, textarea:focus { border-color: #C0395A; }
-    select option { background: #1A0A20; }
-    textarea { resize: vertical; min-height: 80px; font-family: inherit; }
-    .btn {
-      display: block; width: 100%; padding: 12px;
-      border: none; border-radius: 12px; cursor: pointer;
-      font-size: 14px; font-weight: 800; color: #FFF;
-      margin-top: 12px; transition: opacity 0.2s;
-    }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary { background: linear-gradient(90deg, #C0395A, #E8527A); }
-    .btn-gold { background: linear-gradient(90deg, #D4AF37, #FFD700); color: #1A0A20; }
-    .btn-danger { background: rgba(192,57,90,0.2); border: 1px solid rgba(192,57,90,0.5); color: #FF8080; }
-    .btn-clear { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,100,100,0.3); color: #FF8080; }
-    .btn-sm {
-      display: inline-block; width: auto; padding: 6px 14px;
-      font-size: 12px; margin-top: 0; border-radius: 8px;
-    }
-    .item-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-    .item {
-      display: flex; align-items: flex-start; gap: 8px;
-      background: rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 12px;
-    }
-    .item-text { flex: 1; font-size: 13px; color: #FFD6E4; line-height: 1.5; }
-    .item-meta { font-size: 11px; color: rgba(255,182,193,0.5); margin-top: 2px; }
-    .del { background: rgba(192,57,90,0.3); border: none; border-radius: 7px;
-      color: #FF6B8A; font-size: 12px; font-weight: 700;
-      width: 28px; height: 28px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
-    .status {
-      font-size: 13px; margin-top: 10px; padding: 8px 12px;
-      border-radius: 8px; display: none; text-align: center;
-    }
-    .status.ok { background: rgba(50,200,100,0.15); color: #6EE7A0; display: block; }
-    .status.err { background: rgba(200,50,50,0.15); color: #FF8080; display: block; }
-    .badge {
-      display: inline-block; padding: 2px 8px; border-radius: 20px;
-      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-      margin-right: 4px;
-    }
-    .badge-frase { background: rgba(192,57,90,0.3); color: #FF8FAF; }
-    .badge-desafio { background: rgba(212,175,55,0.3); color: #FFD700; }
-    .badge-segredo { background: rgba(92,26,53,0.5); color: #DDA0DD; }
-    .badge-memoria { background: rgba(26,107,74,0.3); color: #5EC89A; }
-    .badge-motivacao { background: rgba(30,100,180,0.3); color: #7EC8FF; }
-    .special-preview {
-      margin-top: 12px; padding: 14px; border-radius: 12px;
-      background: rgba(192,57,90,0.1); border: 1px solid rgba(192,57,90,0.3);
-      display: none;
-    }
-    .special-preview.visible { display: block; }
-    .special-preview p { font-size: 13px; color: rgba(255,200,220,0.9); line-height: 1.6; font-style: italic; }
-    .special-preview strong { color: #FFD700; font-style: normal; }
-    .hint { font-size: 11px; color: rgba(255,182,193,0.5); font-style: italic; margin-top: 6px; }
-    .row { display: flex; gap: 8px; }
-    .row .btn { margin-top: 0; }
-    #login { text-align: center; }
+    html { scroll-behavior: smooth; }
+    body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    .login-screen { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 15% 10%, rgba(241,91,138,.16), transparent 30%), radial-gradient(circle at 85% 80%, rgba(244,194,107,.08), transparent 28%), var(--bg); }
+    .login-card { width: min(440px, 100%); padding: 32px; border: 1px solid var(--border); border-radius: 24px; background: rgba(36,25,42,.94); box-shadow: var(--shadow); }
+    .login-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+    .brand-mark { width: 46px; height: 46px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 15px; background: var(--rose); font-size: 23px; }
+    .brand-copy strong { display: block; font-size: 18px; }
+    .brand-copy span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .login-card h1 { font-size: 26px; margin-bottom: 8px; }
+    .login-card > p { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 20px; }
     #app { display: none; }
-    .section-divider { height: 1px; background: rgba(255,182,193,0.1); margin: 4px 0 16px; }
-    .tpl-btn {
-      padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.3);
-      background: rgba(212,175,55,0.08); color: #FFD700; font-size: 11px; font-weight: 700;
-      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    .app-shell.ready { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; background: var(--sidebar); border-right: 1px solid rgba(255,255,255,.025); overflow-y: auto; }
+    .sidebar-brand { display: flex; align-items: center; gap: 12px; }
+    .sidebar-brand .brand-mark { width: 42px; height: 42px; border-radius: 14px; font-size: 20px; }
+    .admin-badge { margin-left: auto; padding: 6px 9px; border-radius: 999px; background: var(--rose-soft); color: var(--rose); font-size: 9px; font-weight: 800; }
+    .nav-label { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
+    .nav-list { display: flex; flex-direction: column; gap: 4px; }
+    .nav-item { width: 100%; height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 12px; border: 0; border-radius: 12px; background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; font-weight: 600; text-align: left; transition: .2s ease; }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,.035); }
+    .nav-item.active { background: var(--rose-soft); color: var(--text); }
+    .nav-item.active::after { content: ''; width: 6px; height: 6px; margin-left: auto; border-radius: 50%; background: var(--rose); }
+    .nav-icon { width: 20px; display: inline-grid; place-items: center; color: inherit; font-size: 16px; }
+    .sidebar-spacer { flex: 1; min-height: 28px; }
+    .system-card { padding: 13px 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); }
+    .system-line { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 5px rgba(101,214,154,.08); }
+    .system-card small { display: block; margin: 8px 0; color: var(--muted); font-size: 11px; }
+    .security-link { border: 0; background: transparent; color: var(--gold); font-size: 11px; font-weight: 700; cursor: pointer; }
+    .user-card { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--rose-soft); color: var(--rose); font-size: 13px; font-weight: 800; }
+    .user-card strong { display: block; font-size: 13px; }
+    .user-card span { display: block; color: var(--muted); font-size: 11px; }
+    .main { min-width: 0; padding: 30px 36px 44px; }
+    .topbar { min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+    .title-wrap h1 { font-size: clamp(26px, 3vw, 32px); line-height: 1.15; }
+    .title-sub { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 7px; color: var(--muted); font-size: 13px; }
+    .online-pill { padding: 5px 10px; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; background: var(--card); color: var(--success); font-size: 9px; font-weight: 800; }
+    .top-actions { display: flex; gap: 10px; }
+    .menu-toggle { display: none; }
+    .btn { min-height: 42px; padding: 10px 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 12px; color: var(--text); background: var(--raised); cursor: pointer; font-size: 12px; font-weight: 800; transition: transform .18s ease, opacity .18s ease, border-color .18s ease; }
+    .btn:hover { transform: translateY(-1px); opacity: .92; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--rose); }
+    .btn-gold { background: var(--gold); color: #241820; }
+    .btn-clear { background: var(--raised); color: var(--danger); border: 1px solid rgba(255,122,138,.28); }
+    .btn-danger { width: 100%; color: var(--danger); background: rgba(255,122,138,.09); border: 1px solid rgba(255,122,138,.25); }
+    .btn-sm { min-height: 32px; padding: 7px 11px; border-radius: 9px; }
+    .view { display: none; animation: viewIn .25s ease; }
+    .view.active { display: block; }
+    @keyframes viewIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    .metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; margin-bottom: 22px; }
+    .metric-card { min-height: 128px; padding: 15px 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+    .metric-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 11px; }
+    .metric-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: var(--rose-soft); color: var(--rose); }
+    .metric-value { display: block; margin-top: 12px; font-size: 26px; line-height: 1; }
+    .metric-meta { display: block; margin-top: 9px; color: var(--rose); font-size: 10px; font-weight: 700; }
+    .metric-card.gold .metric-icon, .metric-card.gold .metric-meta { color: var(--gold); }
+    .metric-card.success .metric-icon, .metric-card.success .metric-meta { color: var(--success); }
+    .section-heading { margin: 22px 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .section-heading h2 { font-size: 18px; }
+    .quick-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+    .quick-card { min-height: 156px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); cursor: pointer; text-align: left; transition: .2s ease; }
+    .quick-card:hover { transform: translateY(-2px); border-color: rgba(241,91,138,.5); }
+    .quick-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .quick-card .metric-icon { width: 38px; height: 38px; border-radius: 12px; }
+    .quick-card h3 { margin-top: 13px; font-size: 14px; }
+    .quick-card p { margin-top: 7px; color: var(--muted); font-size: 11px; }
+    .arrow { color: var(--rose); font-size: 18px; }
+    .dashboard-lower { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(320px,.95fr); gap: 16px; margin-top: 22px; }
+    .stack { display: flex; flex-direction: column; gap: 14px; }
+    .card { padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+    .card + .card { margin-top: 16px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
+    .card h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+    .card-head p, .hint { margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .content-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+    .content-grid .card + .card { margin-top: 0; }
+    .activity-list { display: flex; flex-direction: column; gap: 3px; }
+    .activity-item { min-height: 50px; display: grid; grid-template-columns: 32px 1fr auto; align-items: center; gap: 10px; }
+    .activity-marker { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 10px; background: var(--rose-soft); color: var(--rose); }
+    .activity-item strong { display: block; font-size: 11px; }
+    .activity-item p, .activity-item time { color: var(--muted); font-size: 10px; }
+    .health-list { display: flex; flex-direction: column; gap: 2px; }
+    .health-row { min-height: 30px; display: flex; align-items: center; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 11px; }
+    .health-row strong { color: var(--success); font-size: 10px; }
+    .security-card { border-color: var(--rose); background: linear-gradient(135deg, rgba(82,38,58,.96), rgba(82,38,58,.72)); }
+    .security-card p { color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .security-card .btn { width: 100%; margin-top: 12px; }
+    .roadmap-list { display: flex; flex-direction: column; gap: 8px; }
+    .roadmap-row { min-height: 30px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 10px; }
+    .priority { min-width: 58px; padding: 5px 8px; border-radius: 999px; text-align: center; color: var(--rose); background: var(--rose-soft); font-size: 8px; font-weight: 800; }
+    .priority.medium { color: var(--gold); background: var(--raised); }
+    label { display: block; margin: 12px 0 6px; color: var(--muted); font-size: 12px; }
+    select, input, textarea { width: 100%; min-height: 43px; padding: 10px 13px; border: 1px solid var(--border); border-radius: 11px; outline: none; color: var(--text); background: var(--raised); font-size: 13px; transition: .2s ease; }
+    select:focus, input:focus, textarea:focus { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(241,91,138,.09); }
+    select option { background: var(--sidebar); }
+    textarea { min-height: 92px; resize: vertical; }
+    .form-actions, .row, .bot-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .form-actions .btn, .row .btn, .bot-actions .btn { flex: 1; }
+    .inline-field { display: flex; gap: 10px; align-items: flex-end; }
+    .inline-field > div { flex: 1; }
+    .status { display: none; margin-top: 10px; padding: 9px 12px; border-radius: 9px; text-align: center; font-size: 12px; }
+    .status.ok { display: block; color: var(--success); background: rgba(101,214,154,.1); }
+    .status.err { display: block; color: var(--danger); background: rgba(255,122,138,.1); }
+    .item-list { max-height: 330px; display: flex; flex-direction: column; gap: 8px; margin-top: 13px; overflow-y: auto; }
+    .item { display: flex; align-items: flex-start; gap: 9px; padding: 11px 12px; border-radius: 11px; background: var(--raised); }
+    .item-text { flex: 1; color: var(--text); font-size: 12px; line-height: 1.5; }
+    .item-meta { margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .del { width: 28px; height: 28px; flex: 0 0 auto; border: 0; border-radius: 8px; color: var(--danger); background: rgba(255,122,138,.12); cursor: pointer; }
+    .badge { display: inline-block; margin-right: 5px; padding: 3px 7px; border-radius: 999px; font-size: 8px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+    .badge-frase { color: #ff8faf; background: rgba(241,91,138,.18); } .badge-desafio { color: var(--gold); background: rgba(244,194,107,.14); }
+    .badge-segredo { color: #dda0dd; background: rgba(221,160,221,.14); } .badge-memoria { color: var(--success); background: rgba(101,214,154,.14); }
+    .badge-motivacao { color: #7ec8ff; background: rgba(126,200,255,.14); }
+    .special-preview { display: none; margin-top: 12px; padding: 14px; border: 1px solid rgba(241,91,138,.32); border-radius: 12px; background: rgba(241,91,138,.08); }
+    .special-preview.visible { display: block; }
+    .special-preview strong { color: var(--gold); }
+    .special-preview p { margin-top: 5px; color: var(--muted); font-size: 13px; line-height: 1.6; font-style: italic; }
+    .tpl-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .tpl-btn { padding: 7px 11px; border: 1px solid rgba(244,194,107,.24); border-radius: 999px; color: var(--gold); background: rgba(244,194,107,.07); font-size: 10px; font-weight: 700; cursor: pointer; }
+    .tpl-btn:hover { background: rgba(244,194,107,.16); }
+    .bot-msg-card { position: relative; margin-top: 12px; padding: 16px; overflow: hidden; border: 1px solid rgba(244,194,107,.24); border-radius: 14px; background: linear-gradient(135deg, rgba(241,91,138,.12), rgba(244,194,107,.07)); }
+    .bot-msg-text { color: var(--text); font-size: 13px; line-height: 1.7; font-style: italic; }
+    .bot-msg-meta, .history-item { color: var(--muted); font-size: 10px; }
+    .bot-msg-meta { margin-top: 8px; }
+    .history-item { padding: 9px 10px; border-bottom: 1px solid var(--border); line-height: 1.5; }
+    .history-date { color: var(--gold); font-size: 9px; font-weight: 800; }
+    .bot-status-dot { width: 8px; height: 8px; display: inline-block; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+    details summary { color: var(--muted); font-size: 11px; cursor: pointer; }
+    @keyframes pulse { 50% { opacity: .45; transform: scale(1.2); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { display: inline-block; animation: spin 1s linear infinite; }
+    .empty-state { padding: 20px; color: var(--muted); text-align: center; font-size: 11px; }
+    .mobile-backdrop { display: none; }
+    @media (max-width: 1120px) {
+      .metrics-grid, .quick-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .dashboard-lower, .content-grid { grid-template-columns: 1fr; }
     }
-    .tpl-btn:hover { background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.6); }
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 0.15; transform: scale(1); }
-      50% { opacity: 0.35; transform: scale(1.15); }
+    @media (max-width: 820px) {
+      .app-shell.ready { display: block; }
+      .sidebar { position: fixed; z-index: 40; left: 0; top: 0; width: 248px; transform: translateX(-100%); transition: transform .25s ease; box-shadow: var(--shadow); }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-backdrop.show { display: block; position: fixed; z-index: 30; inset: 0; background: rgba(0,0,0,.55); }
+      .main { padding: 22px 18px 38px; }
+      .menu-toggle { display: inline-flex; width: 42px; padding: 0; }
+      .topbar { align-items: flex-start; }
+      .top-actions .btn:not(.menu-toggle) { display: none; }
     }
-    .bot-msg-card {
-      background: linear-gradient(135deg, rgba(192,57,90,0.15), rgba(212,175,55,0.1));
-      border: 1px solid rgba(212,175,55,0.3); border-radius: 14px;
-      padding: 16px; margin-top: 12px; position: relative; overflow: hidden;
+    @media (max-width: 560px) {
+      .metrics-grid, .quick-grid { grid-template-columns: 1fr; }
+      .metric-card { min-height: 112px; }
+      .quick-card { min-height: 130px; }
+      .topbar { gap: 12px; }
+      .title-wrap h1 { font-size: 25px; }
+      .inline-field { display: block; }
+      .form-actions .btn, .row .btn, .bot-actions .btn { flex-basis: 100%; }
     }
-    .bot-msg-card::before {
-      content: ''; position: absolute; top: -20px; right: -20px;
-      width: 80px; height: 80px; border-radius: 50%;
-      background: rgba(212,175,55,0.08);
-    }
-    .bot-msg-text { font-size: 14px; color: #FFD6E4; line-height: 1.7; font-style: italic; }
-    .bot-msg-meta { font-size: 11px; color: rgba(255,182,193,0.5); margin-top: 8px; }
-    .bot-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-    .bot-actions .btn { flex: 1; min-width: 120px; font-size: 12px; padding: 10px; }
-    .history-item {
-      font-size: 12px; color: rgba(255,182,193,0.6); padding: 8px 10px;
-      border-bottom: 1px solid rgba(255,182,193,0.08); line-height: 1.5;
-    }
-    .history-date { font-size: 10px; color: rgba(212,175,55,0.6); font-weight: 700; }
-    .bot-status-dot {
-      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-      background: #5EC89A; margin-right: 6px; animation: pulse-glow 2s infinite;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .spin { animation: spin 1s linear infinite; display: inline-block; }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>💖 Painel Mary</h1>
-  <p class="subtitle">Controle remoto do app de amor</p>
-
-  <!-- Login -->
-  <div id="login" class="card">
-    <h2>🔐 Acesso</h2>
-    <label>Senha</label>
-    <input type="password" id="password" placeholder="Digite a senha..." />
-    <button class="btn btn-primary" onclick="checkLogin()">Entrar</button>
-    <div id="loginStatus" class="status"></div>
+  <div id="login" class="login-screen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-mark">♡</div>
+        <div class="brand-copy"><strong>Mary Love</strong><span>Painel administrativo</span></div>
+      </div>
+      <h1>Bem-vindo de volta</h1>
+      <p>Acesse o controle remoto do aplicativo para publicar mensagens, notificações e surpresas.</p>
+      <label for="password">Senha de acesso</label>
+      <input type="password" id="password" placeholder="Digite a senha..." autocomplete="current-password" />
+      <button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="checkLogin()">Entrar no painel →</button>
+      <div id="loginStatus" class="status"></div>
+    </div>
   </div>
 
-  <div id="app">
-
-    <!-- ── MENSAGEM ESPECIAL ── -->
-    <div class="card">
-      <h2>⚡ Mensagem Especial</h2>
-      <p class="hint">Aparece como popup assim que ela abrir o app. Desaparece após ela fechar.</p>
-
-      <label>Emoji</label>
-      <input type="text" id="msgEmoji" value="💖" maxlength="4" style="width:80px" />
-
-      <label>Título</label>
-      <input type="text" id="msgTitle" placeholder="ex: Oi, amor..." />
-
-      <label>Mensagem</label>
-      <textarea id="msgText" placeholder="Escreva algo especial pra ela..." oninput="previewMsg()"></textarea>
-
-      <div class="special-preview" id="msgPreview">
-        <strong id="previewTitle"></strong>
-        <p id="previewText"></p>
+  <div id="app" class="app-shell">
+    <div id="mobileBackdrop" class="mobile-backdrop" onclick="toggleSidebar(false)"></div>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark">♡</div>
+        <div class="brand-copy"><strong>Mary Love</strong><span>Painel Admin</span></div>
+        <span class="admin-badge">ADMIN</span>
       </div>
-
-      <div class="row" style="margin-top:12px">
-        <button class="btn btn-primary" onclick="saveSpecialMsg()">💌 Enviar Mensagem</button>
-        <button class="btn btn-clear btn-sm" style="flex-shrink:0;padding:12px 16px" onclick="clearSpecialMsg()">✕ Limpar</button>
+      <span class="nav-label">NAVEGAÇÃO</span>
+      <nav class="nav-list" aria-label="Navegação do painel">
+        <button class="nav-item active" data-view="dashboard" onclick="showView('dashboard', this)"><span class="nav-icon">▦</span>Visão geral</button>
+        <button class="nav-item" data-view="messages" onclick="showView('messages', this)"><span class="nav-icon">□</span>Mensagens</button>
+        <button class="nav-item" data-view="notifications" onclick="showView('notifications', this)"><span class="nav-icon">♧</span>Notificações</button>
+        <button class="nav-item" data-view="surprises" onclick="showView('surprises', this)"><span class="nav-icon">◇</span>Surpresas</button>
+        <button class="nav-item" data-view="relationship" onclick="showView('relationship', this)"><span class="nav-icon">◷</span>Relacionamento</button>
+        <button class="nav-item" data-view="settings" onclick="showView('settings', this)"><span class="nav-icon">⚙</span>Configurações</button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="system-card">
+        <div class="system-line"><span class="status-dot"></span>App conectado</div>
+        <small id="sidebarSync">Aguardando sincronização</small>
+        <button class="security-link" onclick="showView('settings')">⌑ Reforçar segurança</button>
       </div>
-      <div id="msgStatus" class="status"></div>
-    </div>
-
-    <!-- ── BOT DO AMOR ── -->
-    <div class="card">
-      <h2>🤖 Bot do Amor <span class="bot-status-dot"></span></h2>
-      <p class="hint">Gera uma mensagem carinhosa e romântica nova a cada 24h, sem repetir. Funciona como uma IA do amor!</p>
-
-      <div id="botMsgArea">
-        <p class="hint" style="text-align:center;margin-top:12px"><span class="spin">⏳</span> Carregando mensagem do dia...</p>
+      <div class="user-card">
+        <div class="avatar">M</div>
+        <div><strong>Matheus</strong><span>Administrador</span></div>
       </div>
+    </aside>
 
-      <div class="bot-actions" id="botActions" style="display:none">
-        <button class="btn btn-primary" onclick="useBotAsSpecial()">💌 Usar como Msg Especial</button>
-        <button class="btn btn-gold" onclick="useBotAsNotif()">🔔 Enviar como Notificação</button>
-        <button class="btn btn-clear btn-sm" onclick="generateNewBot()" style="flex:0;padding:10px 14px" title="Gerar outra">🔄</button>
-      </div>
-      <div id="botStatus" class="status"></div>
+    <main class="main">
+      <header class="topbar">
+        <div class="title-wrap">
+          <h1 id="pageTitle">Visão geral</h1>
+          <div class="title-sub"><span id="pageSubtitle">Tudo certo com o aplicativo.</span><span class="online-pill"><span class="status-dot" style="width:6px;height:6px"></span>ONLINE</span></div>
+        </div>
+        <div class="top-actions">
+          <button class="btn menu-toggle" onclick="toggleSidebar(true)" aria-label="Abrir menu">☰</button>
+          <button class="btn" onclick="showView('notifications')">♧ Notificações</button>
+          <button class="btn btn-primary" onclick="openMessageComposer()">▷ Novo envio</button>
+        </div>
+      </header>
 
-      <details style="margin-top:14px">
-        <summary style="font-size:12px;color:rgba(255,182,193,0.5);cursor:pointer;user-select:none">📜 Últimas mensagens geradas</summary>
-        <div id="botHistory" style="max-height:200px;overflow-y:auto;margin-top:6px"></div>
-      </details>
-    </div>
+      <section id="view-dashboard" class="view active">
+        <div class="metrics-grid">
+          <article class="metric-card"><div class="metric-top"><span>Mensagem especial</span><span class="metric-icon">□</span></div><strong id="metricMessage" class="metric-value">—</strong><span id="metricMessageMeta" class="metric-meta">Verificando conteúdo</span></article>
+          <article class="metric-card gold"><div class="metric-top"><span>Frases cadastradas</span><span class="metric-icon">▤</span></div><strong id="metricPhrases" class="metric-value">0</strong><span class="metric-meta">Disponíveis no app</span></article>
+          <article class="metric-card"><div class="metric-top"><span>Surpresas ativas</span><span class="metric-icon">◇</span></div><strong id="metricSurprises" class="metric-value">0</strong><span class="metric-meta">Na rotação diária</span></article>
+          <article class="metric-card success"><div class="metric-top"><span>Intervalo de push</span><span class="metric-icon">◷</span></div><strong id="metricInterval" class="metric-value">1h</strong><span id="metricIntervalMeta" class="metric-meta">Notificações automáticas</span></article>
+        </div>
 
-    <!-- ── NOTIFICAÇÕES ── -->
-    <div class="card">
-      <h2>🔔 Notificações</h2>
+        <div class="section-heading"><h2>Ações rápidas</h2><button class="btn btn-sm" onclick="showView('settings')">Gerenciar ›</button></div>
+        <div class="quick-grid">
+          <button class="quick-card" onclick="openMessageComposer()"><div class="quick-card-top"><span class="metric-icon">▷</span><span class="arrow">→</span></div><h3>Enviar mensagem</h3><p>Publique uma mensagem especial agora.</p></button>
+          <button class="quick-card" onclick="showView('notifications')"><div class="quick-card-top"><span class="metric-icon" style="color:var(--gold)">◷</span><span class="arrow" style="color:var(--gold)">→</span></div><h3>Configurar notificações</h3><p>Defina intervalo, frases e modelos.</p></button>
+          <button class="quick-card" onclick="showView('surprises')"><div class="quick-card-top"><span class="metric-icon">◇</span><span class="arrow">→</span></div><h3>Criar surpresa</h3><p>Adicione uma nova surpresa diária.</p></button>
+          <button class="quick-card" onclick="openBot()"><div class="quick-card-top"><span class="metric-icon" style="color:var(--success)">✦</span><span class="arrow" style="color:var(--success)">→</span></div><h3>Gerar com o Bot</h3><p>Crie uma sugestão romântica diária.</p></button>
+        </div>
 
-      <label>Intervalo entre notificações</label>
-      <select id="intervalSelect">
-        <option value="0.5">30 minutos</option>
-        <option value="1" selected>1 hora</option>
-        <option value="2">2 horas</option>
-        <option value="3">3 horas</option>
-        <option value="4">4 horas</option>
-        <option value="6">6 horas</option>
-        <option value="12">12 horas</option>
-        <option value="0">Desativado</option>
-      </select>
-
-      <label>Frases das notificações</label>
-      <div class="row">
-        <textarea id="newPhrase" placeholder="Digite uma frase carinhosa..." style="min-height:60px"></textarea>
-      </div>
-      <button class="btn btn-primary" onclick="addPhrase()">+ Adicionar Frase</button>
-      <button class="btn btn-gold" onclick="saveInterval()" style="margin-top:8px">💾 Salvar Intervalo</button>
-      <div id="notifStatus" class="status"></div>
-      <div class="item-list" id="phraseList"></div>
-    </div>
-
-    <!-- ── TESTAR NOTIFICAÇÃO ── -->
-    <div class="card">
-      <h2>🔔 Notificação Bonita</h2>
-      <p class="hint">Envia uma notificação push direto pro celular da Mary — funciona mesmo com o app <b>fechado</b>! 🚀</p>
-
-      <label>Templates prontos</label>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px" id="templateBtns"></div>
-
-      <label>Título</label>
-      <input type="text" id="testTitle" value="💖 Oi, Mary" oninput="updateNotifPreview()" />
-
-      <label>Mensagem</label>
-      <textarea id="testBody" placeholder="Escreva a notificação..." style="min-height:60px" oninput="updateNotifPreview()">Te amo! 🌹</textarea>
-
-      <!-- Preview visual -->
-      <div id="notifPreview" style="margin-top:14px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,182,193,0.15);display:none">
-        <div style="background:linear-gradient(135deg,#1A0010,#3B0A20,#5C1A35);padding:14px 16px;position:relative;overflow:hidden">
-          <div style="position:absolute;inset:0;background:#C0395A;opacity:0.08;border-radius:16px"></div>
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative">
-              💖
-              <div style="position:absolute;inset:-4px;border-radius:50%;background:#C0395A;opacity:0.2;animation:pulse-glow 2s infinite"></div>
-            </div>
-            <div style="flex:1;min-width:0">
-              <div id="prevTitle" style="font-size:13px;font-weight:800;color:#FFF;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">💖 Oi, Mary</div>
-              <div id="prevBody" style="font-size:12px;color:rgba(255,200,220,0.9);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">Te amo! 🌹</div>
-            </div>
+        <div class="dashboard-lower">
+          <div class="stack">
+            <article class="card">
+              <div class="card-head"><div><h2>Atividade recente</h2><p>Últimas alterações realizadas no painel</p></div><button class="btn btn-sm" onclick="showView('messages')">Ver conteúdo</button></div>
+              <div id="activityList" class="activity-list"><div class="empty-state">As atividades aparecerão aqui.</div></div>
+            </article>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,182,193,0.1)">
-            <div style="display:flex;align-items:center;gap:3px">
-              <span style="font-size:9px">✨</span>
-              <span style="font-size:10px;color:rgba(255,182,193,0.5);font-weight:600">do Matheus</span>
-              <span style="font-size:9px">✨</span>
-            </div>
-            <span style="font-size:9px;color:rgba(255,182,193,0.3);font-style:italic">preview</span>
+          <div class="stack">
+            <article class="card">
+              <div class="card-head"><h2>Saúde do app</h2><span class="online-pill"><span class="status-dot" style="width:6px;height:6px"></span>ESTÁVEL</span></div>
+              <div class="health-list">
+                <div class="health-row"><span>♧ Push token</span><strong id="healthPush">Verificando</strong></div>
+                <div class="health-row"><span>◇ Firebase</span><strong id="healthFirebase">Conectando</strong></div>
+                <div class="health-row"><span>◷ Última sincronização</span><strong id="healthSync">Agora</strong></div>
+              </div>
+            </article>
+            <article class="card security-card">
+              <div class="card-head"><div><h2>⌑ Ação de segurança necessária</h2><p style="color:var(--rose);font-weight:800">Prioridade alta</p></div></div>
+              <p>A senha atual ainda fica disponível no código público do painel. A correção recomendada é migrar o acesso para Firebase Authentication.</p>
+              <button class="btn btn-primary" onclick="showView('settings')">Ver plano de segurança</button>
+            </article>
+            <article class="card">
+              <div class="card-head"><h2>Próximas funções</h2><span style="color:var(--gold);font-size:9px;font-weight:800">ROADMAP</span></div>
+              <div class="roadmap-list"><div class="roadmap-row"><span>● Agendamento de campanhas</span><span class="priority">ALTA</span></div><div class="roadmap-row"><span>● Modelos reutilizáveis</span><span class="priority medium">MÉDIA</span></div><div class="roadmap-row"><span>● Relatório de entregas</span><span class="priority medium">MÉDIA</span></div></div>
+            </article>
           </div>
         </div>
-      </div>
+      </section>
 
-      <button class="btn btn-gold" onclick="sendTestNotif()" style="margin-top:14px">💌 Enviar Notificação Bonita</button>
-      <div id="testStatus" class="status"></div>
-    </div>
+      <section id="view-messages" class="view">
+        <div class="content-grid">
+          <article class="card" id="specialMessageCard">
+            <div class="card-head"><div><h2>⚡ Mensagem especial</h2><p>Aparece como popup quando o aplicativo é aberto.</p></div><span class="online-pill">PUBLICAÇÃO</span></div>
+            <div class="inline-field"><div style="max-width:90px"><label for="msgEmoji">Emoji</label><input type="text" id="msgEmoji" value="💖" maxlength="4" /></div><div><label for="msgTitle">Título</label><input type="text" id="msgTitle" placeholder="Ex.: Oi, amor..." /></div></div>
+            <label for="msgText">Mensagem</label><textarea id="msgText" placeholder="Escreva algo especial para ela..." oninput="previewMsg()"></textarea>
+            <div class="special-preview" id="msgPreview"><strong id="previewTitle"></strong><p id="previewText"></p></div>
+            <div class="form-actions"><button class="btn btn-primary" onclick="saveSpecialMsg()">▷ Enviar mensagem</button><button class="btn btn-clear" onclick="clearSpecialMsg()">✕ Limpar</button></div>
+            <div id="msgStatus" class="status"></div>
+          </article>
 
-    <!-- ── SURPRESAS ── -->
-    <div class="card">
-      <h2>💝 Surpresas do Dia</h2>
-      <p class="hint">Cada dia ela vê uma surpresa diferente. Adicione aqui as suas.</p>
+          <article class="card" id="botCard">
+            <div class="card-head"><div><h2>✦ Bot do Amor <span class="bot-status-dot"></span></h2><p>Gera uma mensagem carinhosa nova por dia, sem repetir.</p></div><span class="online-pill">ATIVO</span></div>
+            <div id="botMsgArea"><p class="hint" style="text-align:center"><span class="spin">⏳</span> Carregando mensagem do dia...</p></div>
+            <div class="bot-actions" id="botActions" style="display:none"><button class="btn btn-primary" onclick="useBotAsSpecial()">Usar como especial</button><button class="btn btn-gold" onclick="useBotAsNotif()">Enviar push</button><button class="btn btn-clear btn-sm" style="flex:0" onclick="generateNewBot()">↻</button></div>
+            <div id="botStatus" class="status"></div>
+            <details style="margin-top:15px"><summary>Últimas mensagens geradas</summary><div id="botHistory" style="max-height:220px;overflow-y:auto;margin-top:7px"></div></details>
+          </article>
+        </div>
+      </section>
 
-      <label>Tipo</label>
-      <select id="surpriseType">
-        <option value="frase">💬 Frase Carinhosa</option>
-        <option value="motivacao">⚡ Motivação</option>
-        <option value="desafio">🌟 Desafio Amoroso</option>
-        <option value="memoria">📸 Memória</option>
-        <option value="segredo">🤫 Segredinho</option>
-      </select>
+      <section id="view-notifications" class="view">
+        <div class="content-grid">
+          <article class="card">
+            <div class="card-head"><div><h2>♧ Automação de notificações</h2><p>Controle o intervalo e a biblioteca de frases.</p></div><span class="online-pill">AUTOMÁTICO</span></div>
+            <label for="intervalSelect">Intervalo entre notificações</label>
+            <select id="intervalSelect"><option value="0.5">30 minutos</option><option value="1" selected>1 hora</option><option value="2">2 horas</option><option value="3">3 horas</option><option value="4">4 horas</option><option value="6">6 horas</option><option value="12">12 horas</option><option value="0">Desativado</option></select>
+            <label for="newPhrase">Adicionar frase</label><textarea id="newPhrase" placeholder="Digite uma frase carinhosa..."></textarea>
+            <div class="form-actions"><button class="btn btn-primary" onclick="addPhrase()">+ Adicionar frase</button><button class="btn btn-gold" onclick="saveInterval()">Salvar intervalo</button></div>
+            <div id="notifStatus" class="status"></div><div class="item-list" id="phraseList"></div>
+          </article>
 
-      <label>Emoji</label>
-      <input type="text" id="surpriseEmoji" value="💖" maxlength="4" style="width:80px" />
+          <article class="card">
+            <div class="card-head"><div><h2>▷ Envio de notificação</h2><p>Envia uma notificação push mesmo com o app fechado.</p></div><span class="online-pill">PUSH</span></div>
+            <label>Modelos prontos</label><div class="tpl-wrap" id="templateBtns"></div>
+            <label for="testTitle">Título</label><input type="text" id="testTitle" value="💖 Oi, Mary" oninput="updateNotifPreview()" />
+            <label for="testBody">Mensagem</label><textarea id="testBody" placeholder="Escreva a notificação..." oninput="updateNotifPreview()">Te amo! 🌹</textarea>
+            <div id="notifPreview" class="special-preview" style="margin-top:14px"><strong id="prevTitle">💖 Oi, Mary</strong><p id="prevBody">Te amo! 🌹</p><span class="hint">Prévia da notificação • do Matheus</span></div>
+            <button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="sendTestNotif()">▷ Enviar notificação</button><div id="testStatus" class="status"></div>
+          </article>
+        </div>
+      </section>
 
-      <label>Título</label>
-      <input type="text" id="surpriseTitle" placeholder="ex: Pensando em você" />
+      <section id="view-surprises" class="view">
+        <div class="content-grid">
+          <article class="card">
+            <div class="card-head"><div><h2>◇ Criar surpresa</h2><p>Adicione um conteúdo novo para a rotação diária.</p></div><span class="online-pill">CONTEÚDO</span></div>
+            <label for="surpriseType">Tipo</label><select id="surpriseType"><option value="frase">💬 Frase carinhosa</option><option value="motivacao">⚡ Motivação</option><option value="desafio">🌟 Desafio amoroso</option><option value="memoria">📸 Memória</option><option value="segredo">🤫 Segredinho</option></select>
+            <div class="inline-field"><div style="max-width:90px"><label for="surpriseEmoji">Emoji</label><input type="text" id="surpriseEmoji" value="💖" maxlength="4" /></div><div><label for="surpriseTitle">Título</label><input type="text" id="surpriseTitle" placeholder="Ex.: Pensando em você" /></div></div>
+            <label for="surpriseContent">Conteúdo</label><textarea id="surpriseContent" placeholder="Escreva a surpresa..."></textarea>
+            <button class="btn btn-primary" style="width:100%;margin-top:13px" onclick="addSurprise()">+ Adicionar surpresa</button><div id="surpriseStatus" class="status"></div>
+          </article>
+          <article class="card"><div class="card-head"><div><h2>Surpresas cadastradas</h2><p>Itens disponíveis na rotação do aplicativo.</p></div><span id="surpriseCountBadge" class="online-pill">0 ITENS</span></div><div class="item-list" id="surpriseList"></div></article>
+        </div>
+      </section>
 
-      <label>Conteúdo</label>
-      <textarea id="surpriseContent" placeholder="Escreva a surpresa..."></textarea>
+      <section id="view-relationship" class="view">
+        <div class="content-grid">
+          <article class="card"><div class="card-head"><div><h2>◷ Contador de dias</h2><p>Data usada no contador “X dias juntos” do aplicativo.</p></div><span class="online-pill">RELACIONAMENTO</span></div><label for="startDate">Data de início</label><input type="date" id="startDate" /><button class="btn btn-gold" style="width:100%;margin-top:13px" onclick="saveStartDate()">Salvar data</button><div id="dateStatus" class="status"></div></article>
+          <article class="card"><div class="card-head"><h2>Como funciona</h2></div><div class="roadmap-list"><div class="roadmap-row"><span>1. Escolha a data inicial</span><span class="priority medium">PASSO 1</span></div><div class="roadmap-row"><span>2. Salve no Firebase</span><span class="priority medium">PASSO 2</span></div><div class="roadmap-row"><span>3. O app atualiza na próxima abertura</span><span class="priority">PRONTO</span></div></div></article>
+        </div>
+      </section>
 
-      <button class="btn btn-primary" onclick="addSurprise()">+ Adicionar Surpresa</button>
-      <div id="surpriseStatus" class="status"></div>
-      <div class="item-list" id="surpriseList"></div>
-    </div>
-
-    <!-- ── DATA DE INÍCIO ── -->
-    <div class="card">
-      <h2>📅 Contador de Dias</h2>
-      <p class="hint">Data que aparece no contador "X dias juntos" no app dela.</p>
-      <label>Data de início (AAAA-MM-DD)</label>
-      <input type="date" id="startDate" />
-      <button class="btn btn-gold" onclick="saveStartDate()">💾 Salvar Data</button>
-      <div id="dateStatus" class="status"></div>
-    </div>
-
-    <button class="btn btn-danger" onclick="logout()">Sair</button>
-    <div style="height:30px"></div>
+      <section id="view-settings" class="view">
+        <div class="content-grid">
+          <article class="card security-card"><div class="card-head"><div><h2>⌑ Segurança do painel</h2><p style="color:var(--rose);font-weight:800">Migração recomendada</p></div></div><p>O login atual valida uma senha no próprio navegador. Para um painel realmente privado, implemente Firebase Authentication e bloqueie as escritas com regras do Firestore.</p><div class="roadmap-list" style="margin-top:14px"><div class="roadmap-row"><span>Firebase Authentication</span><span class="priority">ALTA</span></div><div class="roadmap-row"><span>Regras por usuário administrador</span><span class="priority">ALTA</span></div><div class="roadmap-row"><span>Registro de alterações</span><span class="priority medium">MÉDIA</span></div></div></article>
+          <article class="card"><div class="card-head"><div><h2>Sessão administrativa</h2><p>Encerre o acesso neste navegador.</p></div></div><div class="user-card" style="margin-bottom:18px"><div class="avatar">M</div><div><strong>Matheus</strong><span>Administrador</span></div></div><button class="btn btn-danger" onclick="logout()">Sair do painel</button></article>
+        </div>
+      </section>
+    </main>
   </div>
-</div>
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js';
@@ -317,8 +368,26 @@
 
   let phrases = [];
   let surprises = [];
+  let adminActivity = [];
+  let hasSpecialMessage = false;
+  let hasPushToken = false;
+
+  const VIEW_INFO = {
+    dashboard: ['Visão geral', 'Tudo certo com o aplicativo.'],
+    messages: ['Mensagens', 'Publique mensagens especiais ou use o Bot do Amor.'],
+    notifications: ['Notificações', 'Controle a automação e envie notificações push.'],
+    surprises: ['Surpresas', 'Gerencie os conteúdos exibidos na rotação diária.'],
+    relationship: ['Relacionamento', 'Configure a data usada no contador do aplicativo.'],
+    settings: ['Configurações', 'Segurança, acesso e preferências administrativas.'],
+  };
 
   // ── utils ──
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+    })[char]);
+  }
+
   function showStatus(id, msg, type) {
     const el = document.getElementById(id);
     el.textContent = msg; el.className = `status ${type}`;
@@ -329,43 +398,134 @@
     await setDoc(doc(db, col, docId), { ...data, updatedAt: new Date().toISOString() });
   }
 
+  window.showView = function (view, trigger) {
+    if (!VIEW_INFO[view]) return;
+    document.querySelectorAll('.view').forEach(section => section.classList.remove('active'));
+    document.getElementById(`view-${view}`)?.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.view === view));
+    document.getElementById('pageTitle').textContent = VIEW_INFO[view][0];
+    document.getElementById('pageSubtitle').textContent = VIEW_INFO[view][1];
+    window.toggleSidebar(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.toggleSidebar = function (open) {
+    document.getElementById('sidebar')?.classList.toggle('open', open);
+    document.getElementById('mobileBackdrop')?.classList.toggle('show', open);
+  };
+
+  window.openMessageComposer = function () {
+    window.showView('messages');
+    setTimeout(() => document.getElementById('msgText')?.focus(), 120);
+  };
+
+  window.openBot = function () {
+    window.showView('messages');
+    setTimeout(() => document.getElementById('botCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+  };
+
+  function formatInterval(hours) {
+    if (hours === 0) return 'Off';
+    if (hours === 0.5) return '30min';
+    return `${hours}h`;
+  }
+
+  function relativeTime(iso) {
+    const timestamp = new Date(iso).getTime();
+    if (!Number.isFinite(timestamp)) return 'Agora';
+    const minutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+    if (minutes < 1) return 'Agora';
+    if (minutes < 60) return `Há ${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `Há ${hours}h`;
+    return new Date(timestamp).toLocaleDateString('pt-BR');
+  }
+
+  function renderActivity() {
+    const container = document.getElementById('activityList');
+    if (!container) return;
+    if (!adminActivity.length) {
+      container.innerHTML = '<div class="empty-state">Nenhuma alteração registrada ainda.</div>';
+      return;
+    }
+    container.innerHTML = adminActivity.slice(0, 6).map((activity, index) => `
+      <div class="activity-item">
+        <span class="activity-marker">${index === 0 ? '●' : '·'}</span>
+        <div><strong>${escapeHtml(activity.title)}</strong><p>${escapeHtml(activity.detail)}</p></div>
+        <time>${relativeTime(activity.createdAt)}</time>
+      </div>`).join('');
+  }
+
+  function updateDashboard() {
+    const interval = parseFloat(document.getElementById('intervalSelect')?.value ?? '1');
+    document.getElementById('metricMessage').textContent = hasSpecialMessage ? 'Ativa' : 'Vazia';
+    document.getElementById('metricMessageMeta').textContent = hasSpecialMessage ? 'Publicada no aplicativo' : 'Nenhuma mensagem publicada';
+    document.getElementById('metricPhrases').textContent = phrases.length;
+    document.getElementById('metricSurprises').textContent = surprises.length;
+    document.getElementById('metricInterval').textContent = formatInterval(interval);
+    document.getElementById('metricIntervalMeta').textContent = interval === 0 ? 'Automação desativada' : 'Notificações automáticas';
+    document.getElementById('surpriseCountBadge').textContent = `${surprises.length} ${surprises.length === 1 ? 'ITEM' : 'ITENS'}`;
+    document.getElementById('healthPush').textContent = hasPushToken ? 'Ativo' : 'Não registrado';
+    document.getElementById('healthPush').style.color = hasPushToken ? 'var(--success)' : 'var(--gold)';
+    document.getElementById('healthFirebase').textContent = 'Conectado';
+    const syncText = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('healthSync').textContent = syncText;
+    document.getElementById('sidebarSync').textContent = `Sincronizado às ${syncText}`;
+    renderActivity();
+  }
+
+  async function logActivity(title, detail) {
+    adminActivity.unshift({ title, detail, createdAt: new Date().toISOString() });
+    adminActivity = adminActivity.slice(0, 12);
+    updateDashboard();
+    await writeDoc('config', 'adminActivity', { list: adminActivity });
+  }
+
   // ── Login ──
   window.checkLogin = async function () {
     if (document.getElementById('password').value !== ADMIN_PASSWORD) {
       showStatus('loginStatus', '❌ Senha incorreta', 'err'); return;
     }
     document.getElementById('login').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+    document.getElementById('app').classList.add('ready');
     await loadAll();
   };
 
   window.logout = function () {
-    document.getElementById('login').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
+    document.getElementById('login').style.display = 'grid';
+    document.getElementById('app').classList.remove('ready');
     document.getElementById('password').value = '';
+    window.showView('dashboard');
   };
 
   // ── Carregar tudo ──
   async function loadAll() {
-    const [notifSnap, phrasesSnap, surprisesSnap, dateSnap, msgSnap] = await Promise.all([
+    const [notifSnap, phrasesSnap, surprisesSnap, dateSnap, msgSnap, pushSnap, activitySnap] = await Promise.all([
       getDoc(doc(db, 'config', 'notifications')),
       getDoc(doc(db, 'config', 'phrases')),
       getDoc(doc(db, 'config', 'surprises')),
       getDoc(doc(db, 'config', 'startDate')),
       getDoc(doc(db, 'config', 'specialMessage')),
+      getDoc(doc(db, 'config', 'pushToken')),
+      getDoc(doc(db, 'config', 'adminActivity')),
     ]);
 
     if (notifSnap.exists()) document.getElementById('intervalSelect').value = String(notifSnap.data().intervalHours ?? 1);
     phrases = phrasesSnap.exists() && phrasesSnap.data().list ? phrasesSnap.data().list : [];
     surprises = surprisesSnap.exists() && surprisesSnap.data().list ? surprisesSnap.data().list : [];
+    hasSpecialMessage = msgSnap.exists() && Boolean(msgSnap.data().text);
+    hasPushToken = pushSnap.exists() && Boolean(pushSnap.data().token);
+    adminActivity = activitySnap.exists() && Array.isArray(activitySnap.data().list) ? activitySnap.data().list : [];
     if (dateSnap.exists() && dateSnap.data().date) document.getElementById('startDate').value = dateSnap.data().date;
-    if (msgSnap.exists() && msgSnap.data().text) {
+    if (hasSpecialMessage) {
       document.getElementById('msgTitle').value = msgSnap.data().title || '';
       document.getElementById('msgText').value = msgSnap.data().text || '';
       document.getElementById('msgEmoji').value = msgSnap.data().emoji || '💖';
+      previewMsg();
     }
 
     renderPhrases(); renderSurprises();
+    updateDashboard();
     loadBotMessage();
   }
 
@@ -391,6 +551,8 @@
       title: document.getElementById('msgTitle').value.trim() || 'Oi, Mary 💖',
       emoji: document.getElementById('msgEmoji').value.trim() || '💖',
     });
+    hasSpecialMessage = true;
+    logActivity('Mensagem especial publicada', document.getElementById('msgTitle').value.trim() || 'Oi, Mary 💖').catch(() => {});
     showStatus('msgStatus', '✅ Mensagem enviada! Aparecerá quando ela abrir o app.', 'ok');
   };
 
@@ -400,6 +562,8 @@
     document.getElementById('msgText').value = '';
     document.getElementById('msgEmoji').value = '💖';
     document.getElementById('msgPreview').classList.remove('visible');
+    hasSpecialMessage = false;
+    logActivity('Mensagem especial removida', 'O popup foi retirado do aplicativo.').catch(() => {});
     showStatus('msgStatus', '🗑️ Mensagem removida.', 'ok');
   };
 
@@ -407,6 +571,7 @@
   window.saveInterval = async function () {
     const hours = parseFloat(document.getElementById('intervalSelect').value);
     await writeDoc('config', 'notifications', { intervalHours: hours });
+    logActivity('Intervalo atualizado', hours === 0 ? 'Notificações automáticas desativadas.' : `Novo intervalo: ${formatInterval(hours)}.`).catch(() => {});
     showStatus('notifStatus', '✅ Intervalo salvo! Aplica na próxima vez que ela abrir.', 'ok');
   };
 
@@ -416,14 +581,19 @@
     phrases.push(text);
     document.getElementById('newPhrase').value = '';
     await writeDoc('config', 'phrases', { list: phrases });
+    logActivity('Frase adicionada', text.substring(0, 72)).catch(() => {});
     showStatus('notifStatus', '✅ Frase adicionada!', 'ok');
     renderPhrases();
+    updateDashboard();
   };
 
   window.deletePhrase = async function (i) {
+    const removed = phrases[i];
     phrases.splice(i, 1);
     await writeDoc('config', 'phrases', { list: phrases });
     renderPhrases();
+    updateDashboard();
+    logActivity('Frase removida', removed?.substring(0, 72) || 'Item excluído.').catch(() => {});
   };
 
   function renderPhrases() {
@@ -432,7 +602,7 @@
       ? '<p class="hint" style="text-align:center;margin-top:8px">Nenhuma frase ainda</p>'
       : phrases.map((p, i) => `
         <div class="item">
-          <span class="item-text">${p}</span>
+          <span class="item-text">${escapeHtml(p)}</span>
           <button class="del" onclick="deletePhrase(${i})">✕</button>
         </div>`).join('');
   }
@@ -450,6 +620,7 @@
         return;
       }
       const pushToken = tokenSnap.data().token;
+      hasPushToken = true;
 
       // Envia via Expo Push API.
       // A API do Expo não envia headers CORS, então uma chamada normal do
@@ -476,6 +647,7 @@
       await setDoc(doc(db, 'config', 'testNotification'), {
         title, body, id: now, createdAt: now, updatedAt: new Date().toISOString(),
       });
+      logActivity('Notificação enviada', title).catch(() => {});
     } catch (e) {
       showStatus('testStatus', '❌ Erro ao enviar: ' + e.message, 'err');
     }
@@ -496,14 +668,19 @@
     document.getElementById('surpriseContent').value = '';
     document.getElementById('surpriseEmoji').value = '💖';
     await writeDoc('config', 'surprises', { list: surprises });
+    logActivity('Surpresa adicionada', title).catch(() => {});
     showStatus('surpriseStatus', '✅ Surpresa adicionada!', 'ok');
     renderSurprises();
+    updateDashboard();
   };
 
   window.deleteSurprise = async function (i) {
+    const removed = surprises[i];
     surprises.splice(i, 1);
     await writeDoc('config', 'surprises', { list: surprises });
     renderSurprises();
+    updateDashboard();
+    logActivity('Surpresa removida', removed?.title || 'Item excluído.').catch(() => {});
   };
 
   function renderSurprises() {
@@ -512,11 +689,11 @@
       ? '<p class="hint" style="text-align:center;margin-top:8px">Nenhuma surpresa ainda</p>'
       : surprises.map((s, i) => `
         <div class="item">
-          <span style="font-size:20px;margin-right:4px">${s.emoji}</span>
+          <span style="font-size:20px;margin-right:4px">${escapeHtml(s.emoji)}</span>
           <div class="item-text">
-            <span class="badge ${BADGE[s.type] || ''}">${LABELS[s.type] || s.type}</span>
-            <strong style="font-size:13px">${s.title}</strong>
-            <div class="item-meta">${s.content.substring(0, 60)}${s.content.length > 60 ? '...' : ''}</div>
+            <span class="badge ${BADGE[s.type] || ''}">${escapeHtml(LABELS[s.type] || s.type)}</span>
+            <strong style="font-size:13px">${escapeHtml(s.title)}</strong>
+            <div class="item-meta">${escapeHtml(s.content.substring(0, 60))}${s.content.length > 60 ? '...' : ''}</div>
           </div>
           <button class="del" onclick="deleteSurprise(${i})">✕</button>
         </div>`).join('');
@@ -527,6 +704,7 @@
     const date = document.getElementById('startDate').value;
     if (!date) { showStatus('dateStatus', '⚠️ Selecione uma data', 'err'); return; }
     await writeDoc('config', 'startDate', { date });
+    logActivity('Data do relacionamento atualizada', new Date(`${date}T12:00:00`).toLocaleDateString('pt-BR')).catch(() => {});
     showStatus('dateStatus', '✅ Data salva! Aplica na próxima abertura.', 'ok');
   };
 
@@ -759,6 +937,8 @@
       title: currentBotMsg.title,
       emoji: '💖',
     });
+    hasSpecialMessage = true;
+    logActivity('Mensagem do Bot publicada', currentBotMsg.title).catch(() => {});
     previewMsg();
     showStatus('botStatus', '✅ Mensagem do bot salva como Mensagem Especial!', 'ok');
   };
@@ -790,6 +970,7 @@
     else botHistory.unshift({ ...msg, generatedAt: new Date().toISOString() });
     if (botHistory.length > 30) botHistory = botHistory.slice(0, 30);
     await writeDoc('config', 'botHistory', { list: botHistory });
+    logActivity('Bot do Amor gerou uma frase', msg.title).catch(() => {});
 
     renderBotMessage();
     renderBotHistory();
