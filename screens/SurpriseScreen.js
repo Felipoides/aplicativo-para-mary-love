@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FloatingHearts from '../components/FloatingHearts';
 import { getTodaySurprise, getDaysTogether } from '../utils/storage';
+import { useTheme } from '../utils/theme';
 
 const TYPE_COLORS = {
   frase:     ['#C0395A', '#E8527A'],
@@ -42,6 +43,7 @@ function PressCard({ onPress, style, children }) {
 
 export default function SurpriseScreen() {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
   const [surprise, setSurprise] = useState(null);
   const [days, setDays] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -98,7 +100,7 @@ export default function SurpriseScreen() {
     <View style={styles.root}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <LinearGradient
-        colors={['#3D1021', '#7B1540', '#C0395A', '#FF85A1', '#FFD6E4']}
+        colors={[theme.accentDark, theme.accent, theme.accentLight, theme.home[1]]}
         style={StyleSheet.absoluteFill}
         start={{ x: 0.1, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -111,9 +113,12 @@ export default function SurpriseScreen() {
       >
         {/* Header */}
         <Animated.View style={[styles.header, { opacity: titleOp, transform: [{ translateY: titleY }] }]}>
+          <View style={styles.headerPill}>
+            <Text style={styles.headerPillText}>UM MIMO POR DIA</Text>
+          </View>
           <Text style={styles.headerTitle}>Surpresa do Dia 💝</Text>
           <Text style={styles.headerSub}>
-            Uma nova surpresa especial{'\n'}a cada dia, só pra você, Mary
+            Tem sempre um novo carinho esperando por você.
           </Text>
         </Animated.View>
 
@@ -154,16 +159,15 @@ export default function SurpriseScreen() {
         {/* Days badge */}
         <View style={styles.daysBadge}>
           <Text style={styles.daysBadgeText}>
-            ❤️  {days} dias juntos — cada um com uma surpresa guardada
+            ❤️  {days} dias juntos — e ainda temos muito para descobrir
           </Text>
         </View>
 
         {/* Quote */}
         <View style={styles.quoteCard}>
+          <Text style={styles.quoteMark}>“</Text>
           <Text style={styles.quoteText}>
-            "O amor está nos pequenos gestos,{'\n'}
-            nas surpresas do cotidiano,{'\n'}
-            em cada momento compartilhado."
+            O amor mora nos pequenos gestos e em cada momento compartilhado.
           </Text>
           <Text style={styles.quoteSig}>— feito com amor para você 🌹</Text>
         </View>
@@ -176,11 +180,16 @@ export default function SurpriseScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  content: { paddingHorizontal: 22, paddingBottom: 30, alignItems: 'center' },
+  content: { width: '100%', maxWidth: 600, alignSelf: 'center', paddingHorizontal: 22, paddingBottom: 30, alignItems: 'center' },
 
   header: { alignItems: 'center', marginBottom: 28 },
+  headerPill: {
+    borderRadius: 999, paddingVertical: 6, paddingHorizontal: 12, marginBottom: 14,
+    backgroundColor: 'rgba(255,255,255,0.14)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)',
+  },
+  headerPillText: { color: '#FFFFFF', fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
   headerTitle: {
-    fontSize: 28, fontWeight: '900', color: '#FFFFFF',
+    fontSize: 30, fontWeight: '900', color: '#FFFFFF', letterSpacing: -0.5,
     textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6,
   },
   headerSub: {
@@ -238,7 +247,9 @@ const styles = StyleSheet.create({
   quoteCard: {
     width: '100%', padding: 20, alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 18,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)',
   },
+  quoteMark: { color: 'rgba(255,255,255,0.4)', fontSize: 34, lineHeight: 30, fontWeight: '900' },
   quoteText: {
     fontSize: 13, color: 'rgba(255,255,255,0.85)',
     textAlign: 'center', fontStyle: 'italic', lineHeight: 22,

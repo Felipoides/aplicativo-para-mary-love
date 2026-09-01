@@ -130,10 +130,10 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { flex: 1 },
   particle: { position: 'absolute', fontSize: 16 },
-  scrollContent: { padding: 16 },
+  scrollContent: { width: '100%', maxWidth: 600, alignSelf: 'center', padding: 16 },
 
   creditsCard: {
-    borderRadius: 20, overflow: 'hidden',
+    borderRadius: 28, overflow: 'hidden',
     borderWidth: 1, borderColor: 'rgba(212,175,55,0.2)',
     backgroundColor: 'rgba(255,255,255,0.04)',
     padding: 22,

@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, Modal, Pressable,
   ScrollView, Animated, TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { THEME_LIST } from '../constants/themes';
@@ -16,7 +17,7 @@ function ThemeCard({ item, active, onPress }) {
       onPressIn={() => Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 40 }).start()}
       onPressOut={() => Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30 }).start()}
     >
-      <Animated.View style={[styles.card, active && styles.cardActive, { transform: [{ scale }] }]}>
+      <Animated.View style={[styles.card, active && { borderColor: item.accent }, { transform: [{ scale }] }]}>
         <View style={styles.swatchRow}>
           <LinearGradient
             colors={item.home}
@@ -33,7 +34,11 @@ function ThemeCard({ item, active, onPress }) {
             <Text style={styles.cardLabel}>{item.label}</Text>
             <Text style={styles.cardDesc}>{item.desc}</Text>
           </View>
-          {active && <Text style={styles.check}>✓</Text>}
+          {active && (
+            <View style={[styles.check, { backgroundColor: item.accent }]}>
+              <Ionicons name="checkmark" size={15} color="#FFFFFF" />
+            </View>
+          )}
         </View>
       </Animated.View>
     </Pressable>
@@ -58,7 +63,7 @@ export default function ThemePickerModal({ visible, onClose }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Animated.View style={[styles.sheet, { paddingBottom: insets.bottom + 16, transform: [{ translateY }] }]}>
+        <Animated.View style={[styles.sheet, { backgroundColor: theme.home[0], paddingBottom: insets.bottom + 16, transform: [{ translateY }] }]}>
           <Pressable onPress={() => {}}>
             <LinearGradient
               colors={[theme.accent, theme.accentDark]}
@@ -67,8 +72,9 @@ export default function ThemePickerModal({ visible, onClose }) {
               end={{ x: 1, y: 0 }}
             >
               <View style={styles.grabber} />
-              <Text style={styles.title}>🎨 Escolha seu tema, Mary</Text>
-              <Text style={styles.subtitle}>Deixa o app com a sua cara 💕</Text>
+              <Text style={styles.eyebrow}>PERSONALIZE SEU CANTINHO</Text>
+              <Text style={styles.title}>Escolha seu tema</Text>
+              <Text style={styles.subtitle}>A mudança aparece no app inteiro.</Text>
             </LinearGradient>
 
             <ScrollView
@@ -110,9 +116,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
+    width: '100%', maxWidth: 600, alignSelf: 'center',
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     overflow: 'hidden',
     maxHeight: '85%',
   },
@@ -125,8 +132,9 @@ const styles = StyleSheet.create({
     width: 44, height: 5, borderRadius: 3,
     backgroundColor: 'rgba(255,255,255,0.5)', marginBottom: 14,
   },
-  title: { fontSize: 19, fontWeight: '900', color: '#FFFFFF' },
-  subtitle: { fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 4, fontStyle: 'italic' },
+  eyebrow: { fontSize: 9, color: 'rgba(255,255,255,0.72)', fontWeight: '900', letterSpacing: 1.5, marginBottom: 5 },
+  title: { fontSize: 21, fontWeight: '900', color: '#FFFFFF', letterSpacing: -0.3 },
+  subtitle: { fontSize: 12, color: 'rgba(255,255,255,0.82)', marginTop: 4 },
 
   list: { maxHeight: 460 },
 
@@ -140,9 +148,6 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08, shadowRadius: 8, elevation: 3,
   },
-  cardActive: {
-    borderColor: '#C0395A',
-  },
   swatchRow: { flexDirection: 'row', alignItems: 'center' },
   swatch: { flex: 1, height: 54 },
   dot: {
@@ -152,7 +157,7 @@ const styles = StyleSheet.create({
   cardEmoji: { fontSize: 26 },
   cardLabel: { fontSize: 15, fontWeight: '800', color: '#3D1021' },
   cardDesc: { fontSize: 12, color: '#8B4560', marginTop: 2 },
-  check: { fontSize: 20, fontWeight: '900', color: '#C0395A' },
+  check: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
 
   doneBtn: { borderRadius: 50, overflow: 'hidden', marginTop: 6, marginBottom: 8 },
   doneGrad: { paddingVertical: 15, alignItems: 'center', borderRadius: 50 },
