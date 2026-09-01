@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FloatingHearts from '../components/FloatingHearts';
 import { getLetters } from '../utils/storage';
+import { useTheme } from '../utils/theme';
 
 const { height } = Dimensions.get('window');
 
@@ -27,6 +28,7 @@ function PressCard({ onPress, style, children }) {
 }
 
 function LetterCard({ letter, onPress, index }) {
+  const { theme } = useTheme();
   const scale = useRef(new Animated.Value(0.9)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const pressScale = useRef(new Animated.Value(1)).current;
@@ -46,20 +48,20 @@ function LetterCard({ letter, onPress, index }) {
   return (
     <Animated.View style={{ transform: [{ scale }, { scale: pressScale }], opacity, marginBottom: 14 }}>
       <Pressable onPress={onPress} onPressIn={handleIn} onPressOut={handleOut}>
-        <View style={styles.card}>
-          <View style={styles.cardAccent} />
+        <View style={[styles.card, { backgroundColor: theme.cardBg, borderColor: theme.accent + '16' }]}>
+          <View style={[styles.cardAccent, { backgroundColor: theme.accent }]} />
           <View style={styles.cardBody}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardEmoji}>{letter.emoji}</Text>
               <View style={styles.cardHeaderText}>
-                <Text style={styles.cardTitle}>{letter.title}</Text>
-                <Text style={styles.cardDate}>{letter.date}</Text>
+                <Text style={[styles.cardTitle, { color: theme.textDark }]}>{letter.title}</Text>
+                <Text style={[styles.cardDate, { color: theme.textMedium }]}>{letter.date}</Text>
               </View>
               <Text style={styles.cardArrow}>💌</Text>
             </View>
-            <Text style={styles.cardPreview} numberOfLines={2}>{letter.preview}</Text>
+            <Text style={[styles.cardPreview, { color: theme.textMedium }]} numberOfLines={2}>{letter.preview}</Text>
             <View style={styles.cardFooter}>
-              <Text style={styles.cardCta}>Toque para ler ❤️</Text>
+              <Text style={[styles.cardCta, { color: theme.accent }]}>Abrir carta  →</Text>
             </View>
           </View>
         </View>
@@ -69,6 +71,7 @@ function LetterCard({ letter, onPress, index }) {
 }
 
 function LetterModal({ letter, visible, onClose }) {
+  const { theme } = useTheme();
   const scrollFade = useRef(new Animated.Value(0)).current;
   const slideY = useRef(new Animated.Value(50)).current;
   const closeBtnScale = useRef(new Animated.Value(1)).current;
@@ -104,7 +107,7 @@ function LetterModal({ letter, visible, onClose }) {
           style={[styles.modalCard, { opacity: scrollFade, transform: [{ translateY: slideY }] }]}
         >
           <LinearGradient
-            colors={['#FFF8F2', '#FFF0F5', '#FFE4EE']}
+            colors={[theme.home[0], theme.home[1], theme.home[0]]}
             style={StyleSheet.absoluteFill}
             borderRadius={28}
           />
@@ -112,13 +115,13 @@ function LetterModal({ letter, visible, onClose }) {
           <View style={styles.modalHeader}>
             <Text style={styles.modalEmoji}>{letter.emoji}</Text>
             <View style={{ flex: 1 }}>
-              <Text style={styles.modalTitle}>{letter.title}</Text>
-              <Text style={styles.modalDate}>{letter.date}</Text>
+              <Text style={[styles.modalTitle, { color: theme.textDark }]}>{letter.title}</Text>
+              <Text style={[styles.modalDate, { color: theme.textMedium }]}>{letter.date}</Text>
             </View>
           </View>
           <View style={styles.modalDivider} />
           <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-            <Text style={styles.modalContent}>{letter.content}</Text>
+            <Text style={[styles.modalContent, { color: theme.textDark }]}>{letter.content}</Text>
             <View style={{ height: 16 }} />
           </ScrollView>
           <Pressable
@@ -127,7 +130,7 @@ function LetterModal({ letter, visible, onClose }) {
             onPressOut={handleCloseOut}
           >
             <Animated.View style={[styles.closeBtn, { transform: [{ scale: closeBtnScale }] }]}>
-              <LinearGradient colors={['#C0395A', '#E8527A']} style={styles.closeBtnGrad} borderRadius={16}>
+              <LinearGradient colors={[theme.accentDark, theme.accent]} style={styles.closeBtnGrad} borderRadius={16}>
                 <Text style={styles.closeBtnText}>Fechar com amor ❤️</Text>
               </LinearGradient>
             </Animated.View>
@@ -140,6 +143,7 @@ function LetterModal({ letter, visible, onClose }) {
 
 export default function LoveLettersScreen() {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
   const [letters, setLetters] = useState([]);
   const [selected, setSelected] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -163,7 +167,7 @@ export default function LoveLettersScreen() {
     <View style={styles.root}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <LinearGradient
-        colors={['#3D1021', '#7B1540', '#C0395A', '#FF85A1', '#FFD6E4']}
+        colors={[theme.accentDark, theme.accent, theme.accentLight, theme.home[1]]}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -176,7 +180,10 @@ export default function LoveLettersScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View style={[styles.titleSection, { opacity: titleOp, transform: [{ translateY: titleY }] }]}>
-          <Text style={styles.mainEmoji}>💌</Text>
+          <View style={styles.titlePill}>
+            <Text style={styles.titlePillText}>NOSSA CAIXA DE CARTAS</Text>
+          </View>
+          <View style={styles.mainEmojiWrap}><Text style={styles.mainEmoji}>💌</Text></View>
           <Text style={styles.mainTitle}>Cartas de Amor</Text>
           <Text style={styles.mainSub}>
             Palavras escritas com o coração,{'\n'}especialmente para você, Mary
@@ -192,6 +199,14 @@ export default function LoveLettersScreen() {
             onPress={() => openLetter(letter)}
           />
         ))}
+
+        {letters.length === 0 && (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyEmoji}>💌</Text>
+            <Text style={styles.emptyTitle}>As próximas palavras estão a caminho</Text>
+            <Text style={styles.emptyText}>Quando uma nova carta chegar, ela vai aparecer aqui.</Text>
+          </View>
+        )}
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
@@ -214,12 +229,22 @@ export default function LoveLettersScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 30 },
+  scrollContent: { width: '100%', maxWidth: 600, alignSelf: 'center', paddingHorizontal: 20, paddingBottom: 30 },
 
   titleSection: { alignItems: 'center', marginBottom: 28 },
-  mainEmoji: { fontSize: 58, marginBottom: 10 },
+  titlePill: {
+    backgroundColor: 'rgba(255,255,255,0.14)', borderRadius: 999,
+    paddingVertical: 6, paddingHorizontal: 12, marginBottom: 14,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)',
+  },
+  titlePillText: { color: '#FFFFFF', fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
+  mainEmojiWrap: {
+    width: 72, height: 72, borderRadius: 24, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.16)', marginBottom: 13,
+  },
+  mainEmoji: { fontSize: 39 },
   mainTitle: {
-    fontSize: 30, fontWeight: '900', color: '#FFFFFF',
+    fontSize: 31, fontWeight: '900', color: '#FFFFFF', letterSpacing: -0.5,
     textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6,
   },
   mainSub: {
@@ -233,7 +258,7 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: '#FFFFFF', borderRadius: 18, overflow: 'hidden',
-    flexDirection: 'row',
+    flexDirection: 'row', borderWidth: 1,
     shadowColor: '#C0395A', shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.18, shadowRadius: 12, elevation: 7,
   },
@@ -248,6 +273,14 @@ const styles = StyleSheet.create({
   cardPreview: { fontSize: 13, color: '#5A2035', lineHeight: 20, fontStyle: 'italic' },
   cardFooter: { marginTop: 10 },
   cardCta: { fontSize: 12, color: '#C0395A', fontWeight: '700' },
+
+  emptyCard: {
+    padding: 28, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.14)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.16)', alignItems: 'center',
+  },
+  emptyEmoji: { fontSize: 34, marginBottom: 10 },
+  emptyTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', textAlign: 'center' },
+  emptyText: { color: 'rgba(255,255,255,0.75)', fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 6 },
 
   footer: {
     marginTop: 6, padding: 20, alignItems: 'center',

@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Animated, Dimensions, Modal, Pressable, ScrollView,
+  Animated, Modal, Pressable, ScrollView, useWindowDimensions,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -46,28 +47,35 @@ function MaryScreen({ onOpenThemes }) {
     <View style={{ flex: 1 }}>
       <LinearGradient colors={theme.home} style={StyleSheet.absoluteFill} />
       <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40 }}
+        contentContainerStyle={{ width: '100%', maxWidth: 600, alignSelf: 'center', paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ alignItems: 'center', marginBottom: 22 }}>
-          <Text style={{ fontSize: 64, marginBottom: 8 }}>🌹</Text>
-          <Text style={{ fontSize: 28, fontWeight: '900', color: theme.textDark, letterSpacing: 0.5 }}>
+        <View style={{ alignItems: 'center', marginBottom: 24 }}>
+          <View style={{ backgroundColor: theme.accent + '16', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999, marginBottom: 16 }}>
+            <Text style={{ fontSize: 9, color: theme.accent, fontWeight: '900', letterSpacing: 1.5 }}>DO MEU CORAÇÃO</Text>
+          </View>
+          <View style={{ width: 72, height: 72, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.cardBg, marginBottom: 13 }}>
+            <Text style={{ fontSize: 40 }}>🌹</Text>
+          </View>
+          <Text style={{ fontSize: 30, fontWeight: '900', color: theme.textDark, letterSpacing: -0.4 }}>
             Para Mary
           </Text>
-          <Text style={{ fontSize: 14, color: theme.textMedium, fontStyle: 'italic', marginTop: 6, textAlign: 'center' }}>
-            Coisas que eu quero que você saiba
+          <Text style={{ fontSize: 14, color: theme.textMedium, marginTop: 7, textAlign: 'center' }}>
+            Sete coisas que eu quero que você nunca esqueça.
           </Text>
         </View>
 
         {/* Botão de tema */}
         <TouchableOpacity onPress={onOpenThemes} activeOpacity={0.85} style={{ marginBottom: 18 }}>
-          <View style={[styles.themeBtn, { borderColor: theme.accent + '40' }]}>
-            <Text style={{ fontSize: 22 }}>🎨</Text>
+          <View style={[styles.themeBtn, { borderColor: theme.accent + '24', backgroundColor: theme.cardBg }]}>
+            <View style={{ width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.accent + '14' }}>
+              <Ionicons name="color-palette-outline" size={20} color={theme.accent} />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 14, fontWeight: '800', color: theme.textDark }}>Escolher tema</Text>
               <Text style={{ fontSize: 12, color: theme.textMedium }}>Deixa o app com a sua cara</Text>
             </View>
-            <Text style={{ fontSize: 16, color: theme.accent, fontWeight: '900' }}>›</Text>
+            <Ionicons name="chevron-forward" size={18} color={theme.accent} />
           </View>
         </TouchableOpacity>
 
@@ -77,11 +85,13 @@ function MaryScreen({ onOpenThemes }) {
             style={{
               opacity: floatAnims[i],
               transform: [{ translateY: floatAnims[i].interpolate({ inputRange: [0, 1], outputRange: [30, 0] }) }],
-              backgroundColor: '#FFFFFF',
+              backgroundColor: theme.cardBg,
               borderRadius: 20,
               padding: 20,
               marginBottom: 12,
-              shadowColor: '#C0395A',
+              borderWidth: 1,
+              borderColor: theme.accent + '14',
+              shadowColor: theme.accentDark,
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.1,
               shadowRadius: 10,
@@ -92,20 +102,21 @@ function MaryScreen({ onOpenThemes }) {
             }}
           >
             <Text style={{ fontSize: 32 }}>{item.emoji}</Text>
-            <Text style={{ flex: 1, fontSize: 15, color: '#5A2035', lineHeight: 24, fontStyle: 'italic' }}>
+            <Text style={{ flex: 1, fontSize: 14, color: theme.textDark, lineHeight: 23 }}>
               {item.text}
             </Text>
           </Animated.View>
         ))}
 
         <View style={{
-          marginTop: 8, padding: 22, backgroundColor: '#FFFFFF',
+          marginTop: 8, padding: 22, backgroundColor: theme.cardBg,
           borderRadius: 20, alignItems: 'center',
-          shadowColor: '#C0395A', shadowOffset: { width: 0, height: 4 },
+          borderWidth: 1, borderColor: theme.accent + '14',
+          shadowColor: theme.accentDark, shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.1, shadowRadius: 10, elevation: 4,
         }}>
           <Text style={{ fontSize: 28, marginBottom: 10 }}>💌</Text>
-          <Text style={{ fontSize: 14, color: '#5A2035', textAlign: 'center', lineHeight: 23, fontStyle: 'italic' }}>
+          <Text style={{ fontSize: 14, color: theme.textDark, textAlign: 'center', lineHeight: 23 }}>
             Te amo mais do que consigo escrever aqui.{'\n'}
             Obrigado por ser você. — Matheus 🌹
           </Text>
@@ -115,14 +126,12 @@ function MaryScreen({ onOpenThemes }) {
   );
 }
 
-const { width } = Dimensions.get('window');
-
 const TABS = [
-  { id: 'home',      emoji: '🏠', label: 'Início' },
-  { id: 'letters',   emoji: '💌', label: 'Cartas' },
-  { id: 'surprises', emoji: '💝', label: 'Surpresas' },
-  { id: 'mary',      emoji: '🌹', label: 'Mary' },
-  { id: 'credits',   emoji: '👨‍💻', label: 'Créditos' },
+  { id: 'home',      icon: 'home-outline', activeIcon: 'home', label: 'Início' },
+  { id: 'letters',   icon: 'mail-outline', activeIcon: 'mail', label: 'Cartas' },
+  { id: 'surprises', icon: 'gift-outline', activeIcon: 'gift', label: 'Surpresa' },
+  { id: 'mary',      icon: 'flower-outline', activeIcon: 'flower', label: 'Mary' },
+  { id: 'credits',   icon: 'person-outline', activeIcon: 'person', label: 'Créditos' },
 ];
 
 function TabItem({ tab, active, onPress, slotWidth, accent }) {
@@ -138,14 +147,20 @@ function TabItem({ tab, active, onPress, slotWidth, accent }) {
       onPress={onPress}
       onPressIn={handleIn}
       onPressOut={handleOut}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={tab.label}
     >
-      <Animated.View style={{ alignItems: 'center', transform: [{ scale: tabScale }] }}>
-        <Text style={[styles.tabEmoji, active && styles.tabEmojiActive]}>
-          {tab.emoji}
-        </Text>
+      <Animated.View style={[styles.tabContent, { transform: [{ scale: tabScale }] }]}>
+        <Ionicons
+          name={active ? tab.activeIcon : tab.icon}
+          size={21}
+          color={active ? accent : '#B78C9C'}
+        />
         <Text style={[styles.tabLabel, active && { color: accent, fontWeight: '800' }]}>
           {tab.label}
         </Text>
+        {active && <View style={[styles.activeDot, { backgroundColor: accent }]} />}
       </Animated.View>
     </Pressable>
   );
@@ -153,9 +168,10 @@ function TabItem({ tab, active, onPress, slotWidth, accent }) {
 
 function TabBar({ activeTab, onTabPress, onGamePress }) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { theme } = useTheme();
   const indicatorX = useRef(new Animated.Value(0)).current;
-  const TAB_SLOT_W = (width - 40) / 6;
+  const TAB_SLOT_W = (Math.min(width, 600) - 24) / 6;
 
   const getTabIndex = (id) => {
     if (id === 'home')      return 0;
@@ -171,11 +187,11 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
       toValue: getTabIndex(activeTab) * TAB_SLOT_W,
       tension: 60, friction: 9, useNativeDriver: true,
     }).start();
-  }, [activeTab]);
+  }, [activeTab, TAB_SLOT_W]);
 
   return (
-    <View style={[styles.tabBarOuter, { paddingBottom: insets.bottom }]}>
-      <View style={styles.tabBarCard}>
+    <View style={[styles.tabBarOuter, { paddingBottom: Math.max(insets.bottom, 6) }]}>
+      <View style={[styles.tabBarCard, { borderColor: theme.accent + '14' }]}>
         <Animated.View
           style={[
             styles.tabIndicator,
@@ -188,9 +204,9 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
 
         {/* Center FAB */}
         <View style={[styles.fabSlot, { width: TAB_SLOT_W }]}>
-          <Pressable style={styles.fab} onPress={onGamePress}>
+          <Pressable style={styles.fab} onPress={onGamePress} accessibilityRole="button" accessibilityLabel="Abrir jogos">
             <LinearGradient colors={[theme.accent, theme.accentDark]} style={styles.fabGrad} borderRadius={30}>
-              <Text style={styles.fabEmoji}>🎮</Text>
+              <Ionicons name="game-controller" size={22} color="#FFFFFF" />
               <Text style={styles.fabLabel}>Jogar</Text>
             </LinearGradient>
           </Pressable>
@@ -377,39 +393,36 @@ const styles = StyleSheet.create({
 
   // Tab bar — floating card style
   tabBarOuter: {
-    paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4,
+    width: '100%', maxWidth: 600, alignSelf: 'center',
+    paddingHorizontal: 12, paddingTop: 8, paddingBottom: 4,
     backgroundColor: 'transparent',
   },
   tabBarCard: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 36,
-    paddingVertical: 8,
-    shadowColor: '#C0395A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18, shadowRadius: 18, elevation: 14,
-    position: 'relative',
+    borderRadius: 25, paddingVertical: 7,
+    borderWidth: 1,
+    shadowColor: '#3D1021', shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.14, shadowRadius: 18, elevation: 14, position: 'relative',
   },
   tabIndicator: {
-    position: 'absolute', height: 52, borderRadius: 26,
-    top: 4,
+    position: 'absolute', height: 48, borderRadius: 18, top: 5,
   },
 
-  tab: { alignItems: 'center', justifyContent: 'center', paddingVertical: 4 },
-  tabEmoji: { fontSize: 22, opacity: 0.45, marginBottom: 2 },
-  tabEmojiActive: { opacity: 1 },
-  tabLabel: { fontSize: 10, color: '#C48EA0', fontWeight: '600' },
+  tab: { alignItems: 'center', justifyContent: 'center', paddingVertical: 2 },
+  tabContent: { alignItems: 'center', justifyContent: 'center', minHeight: 42 },
+  tabLabel: { fontSize: 8, color: '#B78C9C', fontWeight: '700', marginTop: 2 },
+  activeDot: { width: 3, height: 3, borderRadius: 2, marginTop: 2 },
 
   fabSlot: { alignItems: 'center', justifyContent: 'center' },
   fab: {
-    width: 58, height: 58, borderRadius: 29, marginTop: -20,
+    width: 56, height: 56, borderRadius: 20, marginTop: -19,
     shadowColor: '#C0395A', shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.45, shadowRadius: 12, elevation: 14,
     overflow: 'hidden',
   },
-  fabGrad: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 29 },
-  fabEmoji: { fontSize: 22 },
-  fabLabel: { fontSize: 8, color: 'rgba(255,255,255,0.85)', fontWeight: '700' },
+  fabGrad: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 20 },
+  fabLabel: { fontSize: 8, color: 'rgba(255,255,255,0.9)', fontWeight: '800', marginTop: 1 },
 
   // Special message modal
   msgOverlay: {

@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet,
   Animated, ScrollView, StatusBar, Pressable,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../utils/theme';
@@ -41,7 +42,6 @@ const GAMES = [
 ];
 
 function GameCard({ game, best, onPress, delay }) {
-  const { theme } = useTheme();
   const scale = useRef(new Animated.Value(1)).current;
   const entry = useRef(new Animated.Value(0)).current;
 
@@ -81,7 +81,9 @@ function GameCard({ game, best, onPress, delay }) {
               <Text style={styles.bestChipTxt}>🏆 {bestLabel}</Text>
             </View>
           </View>
-          <Text style={styles.cardArrow}>▶</Text>
+          <View style={styles.cardArrow}>
+            <Ionicons name="chevron-forward" size={18} color="#FFFFFF" />
+          </View>
         </View>
       </Pressable>
     </Animated.View>
@@ -120,13 +122,13 @@ export default function GamesHubScreen({ onClose }) {
         </View>
         <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.8}>
           <LinearGradient colors={[theme.accent, theme.accentLight]} style={styles.closeGrad}>
-            <Text style={styles.closeTxt}>✕</Text>
+            <Ionicons name="close" size={21} color="#FFFFFF" />
           </LinearGradient>
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 18, paddingBottom: insets.bottom + 30 }}
+        contentContainerStyle={{ width: '100%', maxWidth: 600, alignSelf: 'center', padding: 18, paddingBottom: insets.bottom + 30 }}
         showsVerticalScrollIndicator={false}
       >
         {GAMES.map((game, i) => (
@@ -153,6 +155,7 @@ export default function GamesHubScreen({ onClose }) {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   header: {
+    width: '100%', maxWidth: 600, alignSelf: 'center',
     flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between',
     paddingHorizontal: 18, paddingBottom: 8,
   },
@@ -161,7 +164,6 @@ const styles = StyleSheet.create({
   sub: { fontSize: 12, color: 'rgba(255,182,193,0.8)', fontStyle: 'italic', marginTop: 3 },
   closeBtn: { borderRadius: 50, overflow: 'hidden', marginTop: 4 },
   closeGrad: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
-  closeTxt: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' },
 
   card: {
     flexDirection: 'row', alignItems: 'center',
@@ -179,7 +181,10 @@ const styles = StyleSheet.create({
     paddingVertical: 4, paddingHorizontal: 12,
   },
   bestChipTxt: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
-  cardArrow: { color: 'rgba(255,255,255,0.85)', fontSize: 16, fontWeight: '900' },
+  cardArrow: {
+    width: 34, height: 34, borderRadius: 13, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
 
   note: {
     marginTop: 8, padding: 18, borderRadius: 16,
