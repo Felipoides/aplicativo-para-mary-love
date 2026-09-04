@@ -14,8 +14,10 @@ import LoveLettersScreen from './screens/LoveLettersScreen';
 import SurpriseScreen from './screens/SurpriseScreen';
 import DeveloperScreen from './screens/DeveloperScreen';
 import CreditsScreen from './screens/CreditsScreen';
+import AffectionScreen from './screens/AffectionScreen';
 import ThemePickerModal from './components/ThemePickerModal';
 import InAppNotification from './components/InAppNotification';
+import MascotBubble from './components/MascotBubble';
 import { scheduleHourlyNotifications, setupNotifications, presentTestNotification, registerForPushNotifications } from './utils/notifications';
 import { syncFromFirebase, dismissSpecialMessage, listenForTestNotification, savePushToken } from './utils/firebase';
 import { ThemeProvider, useTheme } from './utils/theme';
@@ -30,7 +32,7 @@ const MARY_MESSAGES = [
   { emoji: '💝', text: 'Não sou bom de poesia, sou melhor de código. Então transformei o que eu sinto em algo que você pode abrir todo dia. Te amo, Mary. — Matheus' },
 ];
 
-function MaryScreen({ onOpenThemes }) {
+function MaryScreen({ onOpenThemes, onBack }) {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const floatAnims = useRef(MARY_MESSAGES.map(() => new Animated.Value(0))).current;
@@ -50,6 +52,12 @@ function MaryScreen({ onOpenThemes }) {
         contentContainerStyle={{ width: '100%', maxWidth: 600, alignSelf: 'center', paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
+        {onBack && (
+          <TouchableOpacity onPress={onBack} style={styles.maryBack} activeOpacity={0.75} accessibilityLabel="Voltar para o cantinho">
+            <Ionicons name="arrow-back" size={18} color={theme.accent} />
+            <Text style={[styles.maryBackText, { color: theme.accent }]}>Voltar para o cantinho</Text>
+          </TouchableOpacity>
+        )}
         <View style={{ alignItems: 'center', marginBottom: 24 }}>
           <View style={{ backgroundColor: theme.accent + '16', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999, marginBottom: 16 }}>
             <Text style={{ fontSize: 9, color: theme.accent, fontWeight: '900', letterSpacing: 1.5 }}>DO MEU CORAÇÃO</Text>
@@ -130,7 +138,7 @@ const TABS = [
   { id: 'home',      icon: 'home-outline', activeIcon: 'home', label: 'Início' },
   { id: 'letters',   icon: 'mail-outline', activeIcon: 'mail', label: 'Cartas' },
   { id: 'surprises', icon: 'gift-outline', activeIcon: 'gift', label: 'Surpresa' },
-  { id: 'mary',      icon: 'flower-outline', activeIcon: 'flower', label: 'Mary' },
+  { id: 'affection', icon: 'heart-outline', activeIcon: 'heart', label: 'Carinho' },
   { id: 'credits',   icon: 'person-outline', activeIcon: 'person', label: 'Créditos' },
 ];
 
@@ -177,7 +185,7 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
     if (id === 'home')      return 0;
     if (id === 'letters')   return 1;
     if (id === 'surprises') return 3;
-    if (id === 'mary')      return 4;
+    if (id === 'affection') return 4;
     if (id === 'credits')   return 5;
     return 0;
   };
@@ -213,7 +221,7 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
         </View>
 
         <TabItem tab={TABS[2]} active={activeTab === 'surprises'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('surprises')} />
-        <TabItem tab={TABS[3]} active={activeTab === 'mary'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('mary')} />
+        <TabItem tab={TABS[3]} active={activeTab === 'affection'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('affection')} />
         <TabItem tab={TABS[4]} active={activeTab === 'credits'} accent={theme.accent} slotWidth={TAB_SLOT_W} onPress={() => onTabPress('credits')} />
       </View>
     </View>
@@ -226,10 +234,12 @@ function AppInner() {
   const [activeTab, setActiveTab] = useState('home');
   const [showGame, setShowGame] = useState(false);
   const [showDev, setShowDev] = useState(false);
+  const [showMary, setShowMary] = useState(false);
   const [devMode, setDevMode] = useState(false);
   const [showThemes, setShowThemes] = useState(false);
   const [specialMsg, setSpecialMsg] = useState(null);
   const [inAppNotif, setInAppNotif] = useState(null);
+  const [moodId, setMoodId] = useState(null);
   const screenFade = useRef(new Animated.Value(1)).current;
   const msgScale = useRef(new Animated.Value(0.85)).current;
   const msgOpacity = useRef(new Animated.Value(0)).current;
@@ -295,11 +305,21 @@ function AppInner() {
     );
   }
 
+  if (showMary) {
+    return (
+      <View style={[styles.root, { backgroundColor: theme.home[0] }]}>
+        <StatusBar style={theme.statusBar} />
+        <MaryScreen onBack={() => setShowMary(false)} onOpenThemes={() => setShowThemes(true)} />
+        <ThemePickerModal visible={showThemes} onClose={() => setShowThemes(false)} />
+      </View>
+    );
+  }
+
   const renderScreen = () => {
     switch (activeTab) {
       case 'letters':   return <LoveLettersScreen />;
       case 'surprises': return <SurpriseScreen />;
-      case 'mary':      return <MaryScreen onOpenThemes={() => setShowThemes(true)} />;
+      case 'affection': return <AffectionScreen onMoodChange={setMoodId} onOpenMary={() => setShowMary(true)} />;
       case 'credits':   return <CreditsScreen />;
       default:          return (
         <HomeScreen
@@ -364,6 +384,8 @@ function AppInner() {
         </TouchableOpacity>
       )}
 
+      <MascotBubble activeScreen={activeTab} moodId={moodId} bottom={insets.bottom + 72} />
+
       <InAppNotification notification={inAppNotif} onDismiss={() => setInAppNotif(null)} />
     </View>
   );
@@ -380,6 +402,12 @@ const styles = StyleSheet.create({
     shadowColor: '#C0395A', shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08, shadowRadius: 8, elevation: 3,
   },
+  maryBack: {
+    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 7,
+    minHeight: 40, paddingHorizontal: 12, borderRadius: 13, marginBottom: 16,
+    backgroundColor: 'rgba(255,255,255,0.72)',
+  },
+  maryBackText: { fontSize: 11, fontWeight: '800' },
 
   devFab: {
     position: 'absolute', right: 14,
