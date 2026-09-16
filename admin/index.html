@@ -25,7 +25,7 @@
     .login-card h1 { font-size: 26px; margin-bottom: 8px; }
     .login-card > p { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 20px; }
     #app { display: none; }
-    #app.app-shell.ready { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
+    #app.ready { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
     .sidebar { position: sticky; top: 0; height: 100vh; padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; background: var(--sidebar); border-right: 1px solid rgba(255,255,255,.025); overflow-y: auto; }
     .sidebar-brand { display: flex; align-items: center; gap: 12px; }
     .sidebar-brand .brand-mark { width: 42px; height: 42px; border-radius: 14px; font-size: 20px; }
@@ -153,7 +153,7 @@
       .dashboard-lower, .content-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 820px) {
-      .app-shell.ready { display: block; }
+      #app.ready { display: block; }
       .sidebar { position: fixed; z-index: 40; left: 0; top: 0; width: 248px; transform: translateX(-100%); transition: transform .25s ease; box-shadow: var(--shadow); }
       .sidebar.open { transform: translateX(0); }
       .mobile-backdrop.show { display: block; position: fixed; z-index: 30; inset: 0; background: rgba(0,0,0,.55); }
@@ -203,6 +203,7 @@
         <button class="nav-item" data-view="messages" onclick="showView('messages', this)"><span class="nav-icon">□</span>Mensagens</button>
         <button class="nav-item" data-view="notifications" onclick="showView('notifications', this)"><span class="nav-icon">♧</span>Notificações</button>
         <button class="nav-item" data-view="surprises" onclick="showView('surprises', this)"><span class="nav-icon">◇</span>Surpresas</button>
+        <button class="nav-item" data-view="affection" onclick="showView('affection', this)"><span class="nav-icon">♥</span>Carinho</button>
         <button class="nav-item" data-view="relationship" onclick="showView('relationship', this)"><span class="nav-icon">◷</span>Relacionamento</button>
         <button class="nav-item" data-view="settings" onclick="showView('settings', this)"><span class="nav-icon">⚙</span>Configurações</button>
       </nav>
@@ -339,6 +340,42 @@
         </div>
       </section>
 
+      <section id="view-affection" class="view">
+        <div class="content-grid">
+          <div>
+            <article class="card">
+              <div class="card-head"><div><h2>♥ Humor e saudade</h2><p>Veja como a Mary está e quando ela quiser você pertinho.</p></div><span class="online-pill">AO VIVO</span></div>
+              <div class="roadmap-list">
+                <div class="roadmap-row"><span>Humor atual</span><strong id="maryMoodValue">Ainda não respondeu</strong></div>
+                <div class="roadmap-row"><span>Última atualização</span><span id="maryMoodTime">—</span></div>
+                <div class="roadmap-row"><span>Pedidos de saudade</span><strong id="missingCount">0</strong></div>
+                <div class="roadmap-row"><span>Último pedido</span><span id="missingTime">—</span></div>
+              </div>
+              <div id="missingAlert" class="special-preview" style="display:none;margin-top:14px"><strong>🥺 A Mary tá com saudade</strong><p id="missingMessage">Ela queria você pertinho agora.</p></div>
+              <button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="acknowledgeMissing()">💗 Marcar como respondido</button>
+              <div id="affectionStatus" class="status"></div>
+            </article>
+
+            <article class="card">
+              <div class="card-head"><div><h2>🎙️ Áudios surpresa</h2><p>Cole o link de um áudio para ele aparecer no aplicativo.</p></div><span id="audioCountBadge" class="online-pill">0 ÁUDIOS</span></div>
+              <div class="inline-field"><div style="max-width:90px"><label for="audioEmoji">Emoji</label><input id="audioEmoji" value="🎧" maxlength="4" /></div><div><label for="audioTitle">Título</label><input id="audioTitle" placeholder="Ex.: Ouve isso quando estiver triste" /></div></div>
+              <label for="audioCaption">Recadinho</label><input id="audioCaption" placeholder="Gravei pensando em você..." />
+              <label for="audioUrl">Link do áudio</label><input id="audioUrl" type="url" placeholder="https://.../meu-audio.mp3" />
+              <button class="btn btn-primary" style="width:100%;margin-top:13px" onclick="addAudio()">+ Adicionar áudio</button>
+              <div id="audioStatus" class="status"></div><div id="audioList" class="item-list"></div>
+            </article>
+          </div>
+
+          <article class="card">
+            <div class="card-head"><div><h2>💭 Cofrinho de desejos</h2><p>Um desejo diferente aparece no aplicativo todos os dias.</p></div><span id="wishCountBadge" class="online-pill">0 DESEJOS</span></div>
+            <div class="inline-field"><div style="max-width:90px"><label for="wishEmoji">Emoji</label><input id="wishEmoji" value="✨" maxlength="4" /></div><div><label for="wishTitle">O que vocês vão fazer?</label><input id="wishTitle" placeholder="Ex.: Ver o pôr do sol juntos" /></div></div>
+            <label for="wishNote">Detalhe</label><textarea id="wishNote" placeholder="Escreva do seu jeito..."></textarea>
+            <button class="btn btn-gold" style="width:100%;margin-top:13px" onclick="addWish()">+ Guardar desejo</button>
+            <div id="wishStatus" class="status"></div><div id="wishList" class="item-list"></div>
+          </article>
+        </div>
+      </section>
+
       <section id="view-settings" class="view">
         <div class="content-grid">
           <article class="card security-card"><div class="card-head"><div><h2>⌑ Segurança do painel</h2><p style="color:var(--rose);font-weight:800">Migração recomendada</p></div></div><p>O login atual valida uma senha no próprio navegador. Para um painel realmente privado, implemente Firebase Authentication e bloqueie as escritas com regras do Firestore.</p><div class="roadmap-list" style="margin-top:14px"><div class="roadmap-row"><span>Firebase Authentication</span><span class="priority">ALTA</span></div><div class="roadmap-row"><span>Regras por usuário administrador</span><span class="priority">ALTA</span></div><div class="roadmap-row"><span>Registro de alterações</span><span class="priority medium">MÉDIA</span></div></div></article>
@@ -368,6 +405,10 @@
 
   let phrases = [];
   let surprises = [];
+  let wishes = [];
+  let audios = [];
+  let maryMood = null;
+  let missingYou = null;
   let adminActivity = [];
   let hasSpecialMessage = false;
   let hasPushToken = false;
@@ -377,6 +418,7 @@
     messages: ['Mensagens', 'Publique mensagens especiais ou use o Bot do Amor.'],
     notifications: ['Notificações', 'Controle a automação e envie notificações push.'],
     surprises: ['Surpresas', 'Gerencie os conteúdos exibidos na rotação diária.'],
+    affection: ['Carinho', 'Humor, saudade, desejos e áudios especiais.'],
     relationship: ['Relacionamento', 'Configure a data usada no contador do aplicativo.'],
     settings: ['Configurações', 'Segurança, acesso e preferências administrativas.'],
   };
@@ -500,7 +542,7 @@
 
   // ── Carregar tudo ──
   async function loadAll() {
-    const [notifSnap, phrasesSnap, surprisesSnap, dateSnap, msgSnap, pushSnap, activitySnap] = await Promise.all([
+    const [notifSnap, phrasesSnap, surprisesSnap, dateSnap, msgSnap, pushSnap, activitySnap, wishesSnap, audiosSnap, moodSnap, missingSnap] = await Promise.all([
       getDoc(doc(db, 'config', 'notifications')),
       getDoc(doc(db, 'config', 'phrases')),
       getDoc(doc(db, 'config', 'surprises')),
@@ -508,6 +550,10 @@
       getDoc(doc(db, 'config', 'specialMessage')),
       getDoc(doc(db, 'config', 'pushToken')),
       getDoc(doc(db, 'config', 'adminActivity')),
+      getDoc(doc(db, 'config', 'wishes')),
+      getDoc(doc(db, 'config', 'audios')),
+      getDoc(doc(db, 'config', 'maryMood')),
+      getDoc(doc(db, 'config', 'missingYou')),
     ]);
 
     if (notifSnap.exists()) document.getElementById('intervalSelect').value = String(notifSnap.data().intervalHours ?? 1);
@@ -516,6 +562,10 @@
     hasSpecialMessage = msgSnap.exists() && Boolean(msgSnap.data().text);
     hasPushToken = pushSnap.exists() && Boolean(pushSnap.data().token);
     adminActivity = activitySnap.exists() && Array.isArray(activitySnap.data().list) ? activitySnap.data().list : [];
+    wishes = wishesSnap.exists() && Array.isArray(wishesSnap.data().list) ? wishesSnap.data().list : [];
+    audios = audiosSnap.exists() && Array.isArray(audiosSnap.data().list) ? audiosSnap.data().list : [];
+    maryMood = moodSnap.exists() ? moodSnap.data() : null;
+    missingYou = missingSnap.exists() ? missingSnap.data() : null;
     if (dateSnap.exists() && dateSnap.data().date) document.getElementById('startDate').value = dateSnap.data().date;
     if (hasSpecialMessage) {
       document.getElementById('msgTitle').value = msgSnap.data().title || '';
@@ -524,7 +574,7 @@
       previewMsg();
     }
 
-    renderPhrases(); renderSurprises();
+    renderPhrases(); renderSurprises(); renderWishes(); renderAudios(); renderAffectionStatus();
     updateDashboard();
     loadBotMessage();
   }
@@ -697,6 +747,105 @@
           </div>
           <button class="del" onclick="deleteSurprise(${i})">✕</button>
         </div>`).join('');
+  }
+
+  // ── Carinho: humor, saudade, desejos e áudios ──
+  function renderAffectionStatus() {
+    document.getElementById('maryMoodValue').textContent = maryMood
+      ? `${maryMood.emoji || '💗'} ${maryMood.label || 'Atualizado'}`
+      : 'Ainda não respondeu';
+    document.getElementById('maryMoodTime').textContent = maryMood?.createdAt ? relativeTime(maryMood.createdAt) : '—';
+    document.getElementById('missingCount').textContent = Number(missingYou?.count || 0);
+    document.getElementById('missingTime').textContent = missingYou?.lastSentAt ? relativeTime(missingYou.lastSentAt) : '—';
+    const alert = document.getElementById('missingAlert');
+    alert.style.display = missingYou?.active ? 'block' : 'none';
+    if (missingYou?.message) document.getElementById('missingMessage').textContent = missingYou.message;
+  }
+
+  window.acknowledgeMissing = async function () {
+    if (!missingYou?.active) {
+      showStatus('affectionStatus', '💗 Não há nenhum pedido novo de saudade.', 'ok');
+      return;
+    }
+    missingYou = { ...missingYou, active: false, answeredAt: new Date().toISOString() };
+    await writeDoc('config', 'missingYou', missingYou);
+    renderAffectionStatus();
+    logActivity('Saudade respondida', 'Pedido da Mary marcado como respondido.').catch(() => {});
+    showStatus('affectionStatus', '✅ Marcado como respondido!', 'ok');
+  };
+
+  window.addWish = async function () {
+    const emoji = document.getElementById('wishEmoji').value.trim() || '✨';
+    const title = document.getElementById('wishTitle').value.trim();
+    const note = document.getElementById('wishNote').value.trim();
+    if (!title || !note) { showStatus('wishStatus', '⚠️ Preencha o desejo e o detalhe.', 'err'); return; }
+    wishes.push({ id: `wish-${Date.now()}`, emoji, title, note });
+    await writeDoc('config', 'wishes', { list: wishes });
+    document.getElementById('wishEmoji').value = '✨';
+    document.getElementById('wishTitle').value = '';
+    document.getElementById('wishNote').value = '';
+    renderWishes();
+    logActivity('Desejo adicionado', title).catch(() => {});
+    showStatus('wishStatus', '✅ Guardado! Ele já entrou na rotação diária.', 'ok');
+  };
+
+  window.deleteWish = async function (index) {
+    const removed = wishes[index];
+    wishes.splice(index, 1);
+    await writeDoc('config', 'wishes', { list: wishes });
+    renderWishes();
+    logActivity('Desejo removido', removed?.title || 'Item excluído.').catch(() => {});
+  };
+
+  function renderWishes() {
+    document.getElementById('wishCountBadge').textContent = `${wishes.length} ${wishes.length === 1 ? 'DESEJO' : 'DESEJOS'}`;
+    document.getElementById('wishList').innerHTML = wishes.length
+      ? wishes.map((wish, index) => `
+        <div class="item">
+          <span style="font-size:21px">${escapeHtml(wish.emoji || '✨')}</span>
+          <div class="item-text"><strong>${escapeHtml(wish.title)}</strong><div class="item-meta">${escapeHtml(wish.note)}</div></div>
+          <button class="del" onclick="deleteWish(${index})">✕</button>
+        </div>`).join('')
+      : '<div class="empty-state" style="margin-top:14px">Nenhum desejo cadastrado. O app usará as ideias que já vêm nele.</div>';
+  }
+
+  window.addAudio = async function () {
+    const emoji = document.getElementById('audioEmoji').value.trim() || '🎧';
+    const title = document.getElementById('audioTitle').value.trim();
+    const caption = document.getElementById('audioCaption').value.trim();
+    const url = document.getElementById('audioUrl').value.trim();
+    if (!title || !url) { showStatus('audioStatus', '⚠️ Preencha o título e o link do áudio.', 'err'); return; }
+    try { new URL(url); } catch (_) { showStatus('audioStatus', '⚠️ Cole um link completo começando com https://', 'err'); return; }
+    audios.unshift({ id: `audio-${Date.now()}`, emoji, title, caption, url });
+    await writeDoc('config', 'audios', { list: audios });
+    document.getElementById('audioEmoji').value = '🎧';
+    document.getElementById('audioTitle').value = '';
+    document.getElementById('audioCaption').value = '';
+    document.getElementById('audioUrl').value = '';
+    renderAudios();
+    logActivity('Áudio surpresa adicionado', title).catch(() => {});
+    showStatus('audioStatus', '✅ Áudio publicado no aplicativo!', 'ok');
+  };
+
+  window.deleteAudio = async function (index) {
+    const removed = audios[index];
+    audios.splice(index, 1);
+    await writeDoc('config', 'audios', { list: audios });
+    renderAudios();
+    logActivity('Áudio removido', removed?.title || 'Item excluído.').catch(() => {});
+  };
+
+  function renderAudios() {
+    document.getElementById('audioCountBadge').textContent = `${audios.length} ${audios.length === 1 ? 'ÁUDIO' : 'ÁUDIOS'}`;
+    document.getElementById('audioList').innerHTML = audios.length
+      ? audios.map((audio, index) => `
+        <div class="item">
+          <span style="font-size:21px">${escapeHtml(audio.emoji || '🎧')}</span>
+          <div class="item-text"><strong>${escapeHtml(audio.title)}</strong><div class="item-meta">${escapeHtml(audio.caption || audio.url)}</div></div>
+          <a class="btn btn-sm" href="${escapeHtml(audio.url)}" target="_blank" rel="noopener">Ouvir</a>
+          <button class="del" onclick="deleteAudio(${index})">✕</button>
+        </div>`).join('')
+      : '<div class="empty-state" style="margin-top:14px">Nenhum áudio enviado ainda.</div>';
   }
 
   // ── Data de início ──

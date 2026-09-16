@@ -61,15 +61,79 @@ export async function savePushToken(token) {
   await writeDoc('config/pushToken', { token });
 }
 
+// ── Carinho: humor, desejos, saudade e áudios ────────────────
+export async function getSavedMood() {
+  try {
+    const raw = await AsyncStorage.getItem('mary_mood');
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+export async function saveMood(mood) {
+  if (!mood?.id) return false;
+  const payload = {
+    id: mood.id,
+    emoji: mood.emoji || '💗',
+    label: mood.label || 'Meu humor',
+    createdAt: new Date().toISOString(),
+  };
+  await AsyncStorage.setItem('mary_mood', JSON.stringify(payload));
+  return writeDoc('config/maryMood', payload);
+}
+
+export async function getAffectionData() {
+  const [wishesData, audiosData] = await Promise.all([
+    fetchDoc('config/wishes'),
+    fetchDoc('config/audios'),
+  ]);
+
+  if (Array.isArray(wishesData?.list)) {
+    await AsyncStorage.setItem('mary_wishes', JSON.stringify(wishesData.list));
+  }
+  if (Array.isArray(audiosData?.list)) {
+    await AsyncStorage.setItem('mary_audios', JSON.stringify(audiosData.list));
+  }
+
+  try {
+    const [wishesRaw, audiosRaw] = await Promise.all([
+      AsyncStorage.getItem('mary_wishes'),
+      AsyncStorage.getItem('mary_audios'),
+    ]);
+    return {
+      wishes: wishesRaw ? JSON.parse(wishesRaw) : [],
+      audios: audiosRaw ? JSON.parse(audiosRaw) : [],
+    };
+  } catch (_) {
+    return { wishes: [], audios: [] };
+  }
+}
+
+export async function sendMissingYou() {
+  const current = await fetchDoc('config/missingYou');
+  const count = Number(current?.count || 0) + 1;
+  const payload = {
+    active: true,
+    count,
+    lastSentAt: new Date().toISOString(),
+    message: 'A Mary apertou o botão de saudade e queria você pertinho agora. 💗',
+  };
+  await AsyncStorage.setItem('last_missing_you', JSON.stringify(payload));
+  return writeDoc('config/missingYou', payload);
+}
+
 // Sincroniza tudo ao abrir o app.
 // Retorna o que foi aplicado para uso imediato (ex: reagendar notificações).
 export async function syncFromFirebase() {
-  const [notifData, phrasesData, surprisesData, startDateData, specialMsgData] = await Promise.all([
+  const [notifData, phrasesData, surprisesData, startDateData, specialMsgData, wishesData, audiosData] = await Promise.all([
     fetchDoc('config/notifications'),
     fetchDoc('config/phrases'),
     fetchDoc('config/surprises'),
     fetchDoc('config/startDate'),
     fetchDoc('config/specialMessage'),
+    fetchDoc('config/wishes'),
+    fetchDoc('config/audios'),
   ]);
 
   let intervalHours = null;
@@ -89,6 +153,14 @@ export async function syncFromFirebase() {
 
   if (startDateData && startDateData.date) {
     await AsyncStorage.setItem('start_date', startDateData.date);
+  }
+
+  if (wishesData && Array.isArray(wishesData.list)) {
+    await AsyncStorage.setItem('mary_wishes', JSON.stringify(wishesData.list));
+  }
+
+  if (audiosData && Array.isArray(audiosData.list)) {
+    await AsyncStorage.setItem('mary_audios', JSON.stringify(audiosData.list));
   }
 
   // Mensagem especial: guarda localmente para o app exibir
