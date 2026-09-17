@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LOVE_LETTERS, LOVE_PHRASES, SURPRISES } from '../constants/phrases';
+import { DEFAULT_THEME } from '../constants/themes';
 
 const DEFAULT_START_DATE = '2024-01-01';
 
@@ -131,8 +132,22 @@ export const getTodaySurprise = async () => {
   return pool[idx % pool.length];
 };
 
-export const getTheme = async () =>
-  await AsyncStorage.getItem('theme');
+const NIGHT_SKY_DEFAULT_APPLIED = 'night_sky_default_applied';
+
+export const getTheme = async () => {
+  const entries = await AsyncStorage.multiGet(['theme', NIGHT_SKY_DEFAULT_APPLIED]);
+  const savedTheme = entries[0][1];
+
+  if (entries[1][1] !== '1') {
+    await AsyncStorage.multiSet([
+      ['theme', DEFAULT_THEME],
+      [NIGHT_SKY_DEFAULT_APPLIED, '1'],
+    ]);
+    return DEFAULT_THEME;
+  }
+
+  return savedTheme;
+};
 
 export const setTheme = async (theme) =>
   AsyncStorage.setItem('theme', theme);
@@ -152,7 +167,7 @@ export const incrementFlappyGames = async () => {
 export const resetAll = async () => {
   const keys = [
     'start_date', 'letters', 'phrases', 'flappy_best',
-    'open_count', 'surprise_date', 'surprise_index', 'theme', 'flappy_games',
+    'open_count', 'surprise_date', 'surprise_index', 'theme', NIGHT_SKY_DEFAULT_APPLIED, 'flappy_games',
     'memory_best_facil', 'memory_best_medio', 'memory_best_dificil', 'catch_best',
   ];
   await AsyncStorage.multiRemove(keys);
