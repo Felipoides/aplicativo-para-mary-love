@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import NightSky from '../components/NightSky';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../utils/theme';
 import {
@@ -42,6 +43,7 @@ const GAMES = [
 ];
 
 function GameCard({ game, best, onPress, delay }) {
+  const { theme } = useTheme();
   const scale = useRef(new Animated.Value(1)).current;
   const entry = useRef(new Animated.Value(0)).current;
 
@@ -68,7 +70,7 @@ function GameCard({ game, best, onPress, delay }) {
       >
         <View style={styles.card}>
           <LinearGradient
-            colors={game.colors}
+            colors={theme.nightSky ? ['#0B182B', '#19243A', '#42272E'] : game.colors}
             style={StyleSheet.absoluteFill}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -112,7 +114,7 @@ export default function GamesHubScreen({ onClose }) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      <LinearGradient colors={['#0D0518', '#1A0A20', theme.accentDark, '#3D1021']} style={StyleSheet.absoluteFill} />
+      {theme.nightSky ? <NightSky /> : <LinearGradient colors={['#0D0518', '#1A0A20', theme.accentDark, '#3D1021']} style={StyleSheet.absoluteFill} />}
 
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View>
@@ -120,7 +122,7 @@ export default function GamesHubScreen({ onClose }) {
           <Text style={styles.title}>Pra passar o tempo</Text>
           <Text style={styles.sub}>Joguinhos que eu fiz pra você, Mary 💕</Text>
         </View>
-        <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.8}>
+        <TouchableOpacity onPress={onClose} accessibilityRole="button" accessibilityLabel="Fechar jogos" style={styles.closeBtn} activeOpacity={0.8}>
           <LinearGradient colors={[theme.accent, theme.accentLight]} style={styles.closeGrad}>
             <Ionicons name="close" size={21} color="#FFFFFF" />
           </LinearGradient>

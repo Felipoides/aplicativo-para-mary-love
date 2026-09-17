@@ -6,13 +6,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DEFAULT_WISHES, MOODS } from '../constants/affection';
 import { getAffectionData, getSavedMood, saveMood, sendMissingYou } from '../utils/firebase';
 import { useTheme } from '../utils/theme';
+import { ThemedBackground } from '../components/NightSky';
 
 function SectionTitle({ eyebrow, title, icon, color }) {
+  const { theme } = useTheme();
   return (
     <View style={styles.sectionTitle}>
       <View style={{ flex: 1 }}>
         <Text style={[styles.eyebrow, { color }]}>{eyebrow}</Text>
-        <Text style={styles.heading}>{title}</Text>
+        <Text style={[styles.heading, { color: theme.textDark }]}>{title}</Text>
       </View>
       <Ionicons name={icon} size={21} color={color} />
     </View>
@@ -74,7 +76,7 @@ export default function AffectionScreen({ onMoodChange, onOpenMary }) {
 
   return (
     <View style={styles.root}>
-      <LinearGradient colors={theme.home} style={StyleSheet.absoluteFill} />
+      <ThemedBackground />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingTop: insets.top + 20 }]}

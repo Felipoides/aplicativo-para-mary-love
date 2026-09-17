@@ -12,6 +12,7 @@
       "resizeMode": "contain"
     },
     "ios": {
+      "icon": "./assets/icon.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.felpoinho.paramary",
       "infoPlist": {
@@ -28,12 +29,15 @@
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0D0008"
+        "backgroundColor": "#0D1117"
       },
       "permissions": [
         "POST_NOTIFICATIONS",
         "VIBRATE"
       ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [

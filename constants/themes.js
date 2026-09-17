@@ -2,6 +2,15 @@
 // principais do app. Funciona em iOS, Android e web (multiplataforma).
 
 export const THEMES = {
+  nightSky: {
+    id: 'nightSky', label: 'Céu de nós', emoji: '🌌', desc: 'Azul profundo e vermelho discreto',
+    nightSky: true,
+    home: ['#020D1E', '#071629', '#020B18'],
+    counter: ['#111D30', '#162236'],
+    accent: '#B9767A', accentLight: '#C48B8E', accentDark: '#743B40',
+    textDark: '#F5F7FC', textMedium: '#AFBDD1', textLight: '#8E9FB6',
+    cardBg: '#091525', chipBg: '#122137', statusBar: 'light',
+  },
   rose: {
     id: 'rose',
     label: 'Rosa',
@@ -108,4 +117,4 @@ export const THEMES = {
 
 export const THEME_LIST = Object.values(THEMES);
 
-export const DEFAULT_THEME = 'rose';
+export const DEFAULT_THEME = 'nightSky';

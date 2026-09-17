@@ -6,6 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FloatingHearts from '../components/FloatingHearts';
+import NightSky from '../components/NightSky';
 import { getTodaySurprise, getDaysTogether } from '../utils/storage';
 import { useTheme } from '../utils/theme';
 
@@ -93,12 +94,13 @@ export default function SurpriseScreen() {
     Animated.spring(contentOpacity, { toValue: 1, tension: 50, friction: 9, useNativeDriver: true }).start();
   };
 
-  const colors = surprise ? (TYPE_COLORS[surprise.type] || TYPE_COLORS.frase) : ['#C0395A', '#E8527A'];
+  const colors = theme.nightSky ? ['#142137', '#743B40'] : surprise ? (TYPE_COLORS[surprise.type] || TYPE_COLORS.frase) : ['#C0395A', '#E8527A'];
   const label = surprise ? (TYPE_LABELS[surprise.type] || 'Surpresa') : '';
 
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      {theme.nightSky ? <NightSky /> : <>
       <LinearGradient
         colors={[theme.accentDark, theme.accent, theme.accentLight, theme.home[1]]}
         style={StyleSheet.absoluteFill}
@@ -106,6 +108,7 @@ export default function SurpriseScreen() {
         end={{ x: 0.5, y: 1 }}
       />
       <FloatingHearts count={10} />
+      </>}
 
       <ScrollView
         contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}

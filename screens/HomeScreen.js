@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
-  StyleSheet, Animated, StatusBar, Pressable,
+  StyleSheet, Animated, StatusBar, Pressable, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,12 +9,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FloatingHearts from '../components/FloatingHearts';
 import { getDaysTogether, getTodayPhrase, incrementOpenCount } from '../utils/storage';
 import { useTheme } from '../utils/theme';
+import NightSky from '../components/NightSky';
+import OrbitCounter from '../components/OrbitCounter';
+import useAmbientMotion from '../utils/useAmbientMotion';
 
-function PressCard({ onPress, style, children, accessibilityLabel }) {
+function PressCard({ onPress, style, children, accessibilityLabel, flex }) {
   const scale = useRef(new Animated.Value(1)).current;
 
   return (
     <Pressable
+      style={flex ? { flex: 1 } : undefined}
       onPress={onPress}
       onPressIn={() => Animated.spring(scale, { toValue: 0.975, useNativeDriver: true, speed: 40 }).start()}
       onPressOut={() => Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30 }).start()}
@@ -29,8 +33,12 @@ function PressCard({ onPress, style, children, accessibilityLabel }) {
 }
 
 function ActionCard({ icon, eyebrow, title, subtitle, colors, onPress }) {
+  const { theme } = useTheme();
   return (
-    <PressCard style={styles.actionCard} onPress={onPress} accessibilityLabel={title}>
+    <PressCard flex style={[styles.actionCard, theme.nightSky && styles.nightActionCard]} onPress={onPress} accessibilityLabel={title}>
+      {theme.nightSky ? (
+        <Image source={icon === '💌' ? require('../assets/night-letters.png') : require('../assets/night-gift.png')} style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]} resizeMode="cover" />
+      ) : <>
       <LinearGradient
         colors={colors}
         style={StyleSheet.absoluteFill}
@@ -38,8 +46,9 @@ function ActionCard({ icon, eyebrow, title, subtitle, colors, onPress }) {
         end={{ x: 1, y: 1 }}
       />
       <View style={styles.actionGlow} />
-      <View style={styles.actionIconWrap}>
-        <Text style={styles.actionEmoji}>{icon}</Text>
+      </>}
+      <View style={[styles.actionIconWrap, theme.nightSky && { width: 30, height: 30, backgroundColor: 'transparent', marginBottom: 4 }]}>
+        {theme.nightSky ? <Ionicons name={icon === '💌' ? 'mail-outline' : 'gift-outline'} color="#D7B5B8" size={25} /> : <Text style={styles.actionEmoji}>{icon}</Text>}
       </View>
       <Text style={styles.actionEyebrow}>{eyebrow}</Text>
       <Text style={styles.actionTitle}>{title}</Text>
@@ -54,6 +63,7 @@ function ActionCard({ icon, eyebrow, title, subtitle, colors, onPress }) {
 export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const motionEnabled = useAmbientMotion();
   const [days, setDays] = useState(0);
   const [phrase, setPhrase] = useState('');
   const [tapCount, setTapCount] = useState(0);
@@ -93,6 +103,13 @@ export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
       ]),
     ]).start();
 
+    return () => {
+      if (tapTimer.current) clearTimeout(tapTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!motionEnabled) return;
     const heartbeat = Animated.loop(
       Animated.sequence([
         Animated.timing(heartScale, { toValue: 1.12, duration: 220, useNativeDriver: true }),
@@ -104,9 +121,8 @@ export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
 
     return () => {
       heartbeat.stop();
-      if (tapTimer.current) clearTimeout(tapTimer.current);
     };
-  }, []);
+  }, [motionEnabled, heartScale]);
 
   const handleSecretTap = () => {
     const newCount = tapCount + 1;
@@ -126,6 +142,7 @@ export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle={theme.statusBar === 'light' ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
+      {theme.nightSky ? <NightSky /> : <>
       <LinearGradient
         colors={theme.home}
         style={StyleSheet.absoluteFill}
@@ -134,12 +151,14 @@ export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
       />
       <View style={[styles.ambientGlow, { backgroundColor: theme.accentLight }]} />
       <FloatingHearts count={5} />
+      </>}
 
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.content, { paddingTop: insets.top + 14 }]}
         showsVerticalScrollIndicator={false}
       >
+        {theme.nightSky && <Image source={require('../assets/night-constellation.png')} pointerEvents="none" aria-hidden={true} style={{ position: 'absolute', top: insets.top + 45, right: 30, width: 110, height: 115, opacity: 0.55 }} resizeMode="contain" />}
         <Animated.View style={[styles.topBar, { opacity: headerOp, transform: [{ translateY: headerY }] }]}>
           <TouchableOpacity onPress={handleSecretTap} activeOpacity={0.85} style={styles.brand}>
             <Animated.View style={[styles.brandMark, { backgroundColor: `${theme.accent}16`, transform: [{ scale: heartScale }] }]}>
@@ -162,20 +181,21 @@ export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
           </TouchableOpacity>
         </Animated.View>
 
-        <Animated.View style={[styles.hero, { opacity: headerOp, transform: [{ translateY: headerY }] }]}>
+        <Animated.View style={[styles.hero, theme.nightSky && { marginBottom: 18 }, { opacity: headerOp, transform: [{ translateY: headerY }] }]}>
           <View style={[styles.heroPill, { backgroundColor: `${theme.accent}16` }]}>
             <View style={[styles.heroPillDot, { backgroundColor: theme.accent }]} />
             <Text style={[styles.heroPillText, { color: theme.accent }]}>FEITO SÓ PARA VOCÊ</Text>
           </View>
           <Text style={[styles.heroTitle, { color: theme.textDark }]}>Oi, meu amor.</Text>
-          <Text style={[styles.heroTitleAccent, { color: theme.accent }]}>Que bom ter você aqui.</Text>
-          <Text style={[styles.heroSubtitle, { color: theme.textMedium }]}>
+          <Text style={[styles.heroTitleAccent, { color: theme.accent }, theme.nightSky && { fontSize: 29, lineHeight: 33, letterSpacing: -0.8 }]}>Que bom ter você aqui.</Text>
+          <Text style={[styles.heroSubtitle, { color: theme.textMedium }, theme.nightSky && { lineHeight: 19, marginTop: 10 }]}>
             Um lugar para guardar palavras, memórias e pequenas surpresas nossas.
           </Text>
         </Animated.View>
 
         <Animated.View style={{ opacity: counterOp, transform: [{ translateY: counterY }] }}>
-          <View style={styles.counterCard}>
+          <View style={[styles.counterCard, theme.nightSky && styles.nightCounter]}>
+            {!theme.nightSky && <>
             <LinearGradient
               colors={theme.counter}
               style={StyleSheet.absoluteFill}
@@ -183,27 +203,28 @@ export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
               end={{ x: 1, y: 1 }}
             />
             <View style={styles.counterOrb} />
+            </>}
             <View style={styles.counterTop}>
               <View style={styles.counterBadge}>
                 <Ionicons name="calendar-clear-outline" size={14} color="#FFFFFF" />
                 <Text style={styles.counterLabel}>NOSSA HISTÓRIA</Text>
               </View>
-              <Ionicons name="heart-circle-outline" size={31} color="rgba(255,255,255,0.8)" />
+              {!theme.nightSky && <Ionicons name="heart-circle-outline" size={31} color="rgba(255,255,255,0.8)" />}
             </View>
-            <View style={styles.counterMain}>
+            {theme.nightSky ? <OrbitCounter days={days} /> : <View style={styles.counterMain}>
               <Text style={styles.counterNum}>{days}</Text>
               <View style={styles.counterCopy}>
                 <Text style={styles.counterUnit}>dias juntos</Text>
                 <Text style={styles.counterSub}>e contando…</Text>
               </View>
-            </View>
-            <View style={styles.counterDivider} />
-            <Text style={styles.counterFooter}>Desde o primeiro dia, você continua sendo minha pessoa favorita.</Text>
+            </View>}
+            <View style={[styles.counterDivider, theme.nightSky && { marginVertical: 6 }]} />
+            <Text style={[styles.counterFooter, theme.nightSky && { textAlign: 'center', color: theme.textMedium, fontSize: 10, lineHeight: 16 }]}>Desde o primeiro dia, você continua sendo minha pessoa favorita.</Text>
           </View>
         </Animated.View>
 
         <Animated.View style={{ opacity: phraseOp, transform: [{ translateY: phraseY }] }}>
-          <View style={[styles.phraseCard, { backgroundColor: theme.cardBg, borderColor: surfaceBorder }]}>
+          <View style={[styles.phraseCard, { backgroundColor: theme.cardBg, borderColor: surfaceBorder }, theme.nightSky && { borderLeftWidth: 3, borderLeftColor: theme.accentDark }]}>
             <View style={[styles.phraseIcon, { backgroundColor: `${theme.accent}16` }]}>
               <Ionicons name="chatbubble-ellipses-outline" size={20} color={theme.accent} />
             </View>
@@ -244,7 +265,7 @@ export default function HomeScreen({ navigate, onUnlockDev, onOpenThemes }) {
 
           <PressCard style={styles.gameBanner} onPress={() => navigate('game')} accessibilityLabel="Abrir jogos">
             <LinearGradient
-              colors={['#160B24', '#39204D', theme.accentDark]}
+              colors={theme.nightSky ? ['#0B1728', '#101D30'] : ['#160B24', '#39204D', theme.accentDark]}
               style={StyleSheet.absoluteFill}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -319,6 +340,7 @@ const styles = StyleSheet.create({
     shadowColor: '#6F1735', shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.28, shadowRadius: 20, elevation: 12,
   },
+  nightCounter: { padding: 0, paddingTop: 5, borderRadius: 0, elevation: 0, shadowOpacity: 0, overflow: 'visible', marginBottom: 20 },
   counterOrb: {
     position: 'absolute', width: 180, height: 180, borderRadius: 90,
     backgroundColor: 'rgba(255,255,255,0.10)', right: -55, top: -75,
@@ -355,6 +377,7 @@ const styles = StyleSheet.create({
     shadowColor: '#3D1021', shadowOffset: { width: 0, height: 7 },
     shadowOpacity: 0.2, shadowRadius: 15, elevation: 8,
   },
+  nightActionCard: { minHeight: 145, padding: 12, borderRadius: 17, borderWidth: 1, borderColor: '#29384D', shadowOpacity: 0, elevation: 0 },
   actionGlow: {
     position: 'absolute', width: 115, height: 115, borderRadius: 58,
     backgroundColor: 'rgba(255,255,255,0.11)', right: -34, top: -36,

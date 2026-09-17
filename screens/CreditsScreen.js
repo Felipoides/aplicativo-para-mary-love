@@ -4,8 +4,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import NightSky from '../components/NightSky';
+import { useTheme } from '../utils/theme';
 
 export default function CreditsScreen() {
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const fadeIn = useRef(new Animated.Value(0)).current;
   const slideIn = useRef(new Animated.Value(30)).current;
@@ -19,6 +22,7 @@ export default function CreditsScreen() {
 
   return (
     <View style={styles.root}>
+      {theme.nightSky ? <NightSky /> : <>
       <LinearGradient
         colors={['#0A0515', '#1A0A20', '#2C1654', '#3D1021']}
         style={StyleSheet.absoluteFill}
@@ -27,6 +31,7 @@ export default function CreditsScreen() {
       {['✨', '⭐', '💫', '✨', '⭐'].map((s, i) => (
         <Text key={i} style={[styles.particle, { top: 60 + i * 40, left: 20 + i * 60, opacity: 0.4 }]}>{s}</Text>
       ))}
+      </>}
 
       <Animated.View style={[styles.container, { opacity: fadeIn, transform: [{ translateY: slideIn }] }]}>
         <ScrollView

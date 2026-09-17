@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MASCOT_SCREEN_LINES, MOODS } from '../constants/affection';
 import { useTheme } from '../utils/theme';
+import useAmbientMotion from '../utils/useAmbientMotion';
 
 export default function MascotBubble({ activeScreen, moodId, bottom = 82 }) {
   const { theme } = useTheme();
+  const motionEnabled = useAmbientMotion();
   const bounce = useRef(new Animated.Value(0)).current;
   const [lineIndex, setLineIndex] = useState(0);
   const [showBubble, setShowBubble] = useState(true);
@@ -21,6 +23,7 @@ export default function MascotBubble({ activeScreen, moodId, bottom = 82 }) {
   }, [activeScreen, moodId]);
 
   useEffect(() => {
+    if (!motionEnabled) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(bounce, { toValue: -5, duration: 1100, useNativeDriver: true }),
@@ -29,12 +32,12 @@ export default function MascotBubble({ activeScreen, moodId, bottom = 82 }) {
     );
     loop.start();
     return () => loop.stop();
-  }, [bounce]);
+  }, [bounce, motionEnabled]);
 
   const interact = () => {
     setShowBubble(true);
     setLineIndex((current) => (current + 1) % lines.length);
-    Animated.sequence([
+    if (motionEnabled) Animated.sequence([
       Animated.spring(bounce, { toValue: -12, speed: 30, useNativeDriver: true }),
       Animated.spring(bounce, { toValue: 0, speed: 22, useNativeDriver: true }),
     ]).start();

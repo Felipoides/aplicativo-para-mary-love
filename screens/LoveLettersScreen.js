@@ -6,6 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FloatingHearts from '../components/FloatingHearts';
+import NightSky from '../components/NightSky';
 import { getLetters } from '../utils/storage';
 import { useTheme } from '../utils/theme';
 
@@ -102,7 +103,7 @@ function LetterModal({ letter, visible, onClose }) {
           colors={['rgba(61,16,33,0.97)', 'rgba(139,30,63,0.95)']}
           style={StyleSheet.absoluteFill}
         />
-        <FloatingHearts count={6} />
+        {!theme.nightSky && <FloatingHearts count={6} />}
         <Animated.View
           style={[styles.modalCard, { opacity: scrollFade, transform: [{ translateY: slideY }] }]}
         >
@@ -166,6 +167,7 @@ export default function LoveLettersScreen() {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      {theme.nightSky ? <NightSky /> : <>
       <LinearGradient
         colors={[theme.accentDark, theme.accent, theme.accentLight, theme.home[1]]}
         style={StyleSheet.absoluteFill}
@@ -173,6 +175,7 @@ export default function LoveLettersScreen() {
         end={{ x: 0.5, y: 1 }}
       />
       <FloatingHearts count={8} />
+      </>}
 
       <ScrollView
         style={styles.scroll}

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Animated, Modal, Pressable, ScrollView, useWindowDimensions,
+  Animated, Modal, Pressable, ScrollView, useWindowDimensions, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,6 +18,7 @@ import AffectionScreen from './screens/AffectionScreen';
 import ThemePickerModal from './components/ThemePickerModal';
 import InAppNotification from './components/InAppNotification';
 import MascotBubble from './components/MascotBubble';
+import { ThemedBackground } from './components/NightSky';
 import { scheduleHourlyNotifications, setupNotifications, presentTestNotification, registerForPushNotifications } from './utils/notifications';
 import { syncFromFirebase, dismissSpecialMessage, listenForTestNotification, savePushToken } from './utils/firebase';
 import { ThemeProvider, useTheme } from './utils/theme';
@@ -47,7 +48,7 @@ function MaryScreen({ onOpenThemes, onBack }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <LinearGradient colors={theme.home} style={StyleSheet.absoluteFill} />
+      <ThemedBackground />
       <ScrollView
         contentContainerStyle={{ width: '100%', maxWidth: 600, alignSelf: 'center', paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
@@ -143,6 +144,7 @@ const TABS = [
 ];
 
 function TabItem({ tab, active, onPress, slotWidth, accent }) {
+  const { theme } = useTheme();
   const tabScale = useRef(new Animated.Value(1)).current;
   const handleIn = () =>
     Animated.spring(tabScale, { toValue: 0.85, useNativeDriver: true, speed: 50 }).start();
@@ -163,9 +165,9 @@ function TabItem({ tab, active, onPress, slotWidth, accent }) {
         <Ionicons
           name={active ? tab.activeIcon : tab.icon}
           size={21}
-          color={active ? accent : '#B78C9C'}
+          color={active ? accent : theme.textMedium}
         />
-        <Text style={[styles.tabLabel, active && { color: accent, fontWeight: '800' }]}>
+        <Text style={[styles.tabLabel, { color: theme.textMedium }, active && { color: accent, fontWeight: '800' }]}>
           {tab.label}
         </Text>
         {active && <View style={[styles.activeDot, { backgroundColor: accent }]} />}
@@ -179,7 +181,7 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
   const { width } = useWindowDimensions();
   const { theme } = useTheme();
   const indicatorX = useRef(new Animated.Value(0)).current;
-  const TAB_SLOT_W = (Math.min(width, 600) - 24) / 6;
+  const TAB_SLOT_W = (Math.min(width, Platform.OS === 'web' ? 390 : 600) - 24) / 6;
 
   const getTabIndex = (id) => {
     if (id === 'home')      return 0;
@@ -199,7 +201,7 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
 
   return (
     <View style={[styles.tabBarOuter, { paddingBottom: Math.max(insets.bottom, 6) }]}>
-      <View style={[styles.tabBarCard, { borderColor: theme.accent + '14' }]}>
+      <View style={[styles.tabBarCard, { borderColor: theme.accent + '24', backgroundColor: theme.cardBg }]}>
         <Animated.View
           style={[
             styles.tabIndicator,
@@ -213,7 +215,7 @@ function TabBar({ activeTab, onTabPress, onGamePress }) {
         {/* Center FAB */}
         <View style={[styles.fabSlot, { width: TAB_SLOT_W }]}>
           <Pressable style={styles.fab} onPress={onGamePress} accessibilityRole="button" accessibilityLabel="Abrir jogos">
-            <LinearGradient colors={[theme.accent, theme.accentDark]} style={styles.fabGrad} borderRadius={30}>
+            <LinearGradient colors={theme.nightSky ? [theme.chipBg, theme.chipBg] : [theme.accent, theme.accentDark]} style={styles.fabGrad} borderRadius={30}>
               <Ionicons name="game-controller" size={22} color="#FFFFFF" />
               <Text style={styles.fabLabel}>Jogar</Text>
             </LinearGradient>
@@ -344,7 +346,7 @@ function AppInner() {
         <View style={styles.msgOverlay}>
           <Animated.View style={[styles.msgCard, { opacity: msgOpacity, transform: [{ scale: msgScale }] }]}>
             <LinearGradient
-              colors={['#1A0010', '#3B0A20', '#7B1540']}
+              colors={theme.nightSky ? theme.home : ['#1A0010', '#3B0A20', '#7B1540']}
               style={StyleSheet.absoluteFill}
               borderRadius={28}
             />
@@ -354,7 +356,7 @@ function AppInner() {
             <View style={styles.msgDivider} />
             <Text style={styles.msgText}>{specialMsg?.text}</Text>
             <TouchableOpacity style={styles.msgBtn} onPress={handleDismissMsg} activeOpacity={0.8}>
-              <LinearGradient colors={['#C0395A', '#E8527A']} style={styles.msgBtnGrad} borderRadius={50}>
+              <LinearGradient colors={theme.nightSky ? [theme.accentDark, theme.accentDark] : ['#C0395A', '#E8527A']} style={styles.msgBtnGrad} borderRadius={50}>
                 <Text style={styles.msgBtnText}>💕 Fechar</Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -439,18 +441,18 @@ const styles = StyleSheet.create({
 
   tab: { alignItems: 'center', justifyContent: 'center', paddingVertical: 2 },
   tabContent: { alignItems: 'center', justifyContent: 'center', minHeight: 42 },
-  tabLabel: { fontSize: 8, color: '#B78C9C', fontWeight: '700', marginTop: 2 },
+  tabLabel: { fontSize: 10, color: '#B78C9C', fontWeight: '700', marginTop: 4 },
   activeDot: { width: 3, height: 3, borderRadius: 2, marginTop: 2 },
 
   fabSlot: { alignItems: 'center', justifyContent: 'center' },
   fab: {
-    width: 56, height: 56, borderRadius: 20, marginTop: -19,
+    width: 48, height: 48, borderRadius: 16, marginTop: 0,
     shadowColor: '#C0395A', shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.45, shadowRadius: 12, elevation: 14,
     overflow: 'hidden',
   },
   fabGrad: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 20 },
-  fabLabel: { fontSize: 8, color: 'rgba(255,255,255,0.9)', fontWeight: '800', marginTop: 1 },
+  fabLabel: { fontSize: 10, color: 'rgba(255,255,255,0.9)', fontWeight: '800', marginTop: 4 },
 
   // Special message modal
   msgOverlay: {
@@ -458,7 +460,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', padding: 24,
   },
   msgCard: {
-    width: '100%', borderRadius: 28, padding: 30, alignItems: 'center',
+    width: '100%', maxWidth: 350, borderRadius: 28, padding: 30, alignItems: 'center',
     overflow: 'hidden',
     shadowColor: '#C0395A', shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.5, shadowRadius: 24, elevation: 22,
@@ -480,11 +482,16 @@ const styles = StyleSheet.create({
 });
 
 export default function App() {
+  const { width, height } = useWindowDimensions();
   return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#030912' }}>
+    <View testID="mary-app-screen" style={Platform.OS === 'web' ? { width: Math.min(width, 390), height: Math.min(height, 844), overflow: 'hidden' } : { flex: 1, width: '100%' }}>
     <SafeAreaProvider>
       <ThemeProvider>
         <AppInner />
       </ThemeProvider>
     </SafeAreaProvider>
+    </View>
+    </View>
   );
 }

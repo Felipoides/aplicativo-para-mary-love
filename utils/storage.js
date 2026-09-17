@@ -132,7 +132,7 @@ export const getTodaySurprise = async () => {
 };
 
 export const getTheme = async () =>
-  (await AsyncStorage.getItem('theme')) || 'rose';
+  await AsyncStorage.getItem('theme');
 
 export const setTheme = async (theme) =>
   AsyncStorage.setItem('theme', theme);
