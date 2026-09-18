@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { AppState, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MascotViewer from '../components/MascotViewer';
@@ -19,6 +19,15 @@ export default function MascotsScreen({ onBack }) {
   const [selected, setSelected] = useState('both');
   const [error, setError] = useState(null);
   const [hearts, setHearts] = useState(0);
+  const [viewerKey, setViewerKey] = useState(0);
+  const [active, setActive] = useState(true);
+  const reload = () => { setError(null); setViewerKey((key) => key + 1); };
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      setActive(state === 'active');
+    });
+    return () => subscription.remove();
+  }, []);
 
   return (
     <View style={[styles.page, { backgroundColor: theme.home[0] }]}>
@@ -36,9 +45,13 @@ export default function MascotsScreen({ onBack }) {
             <View style={styles.fallback}>
               <Image source={require('../assets/mascots/conceito-aprovado.png')} resizeMode="contain" style={styles.fallbackImage} />
               <Text style={styles.fallbackText}>O 3D não carregou neste aparelho. Nosso desenho continua aqui 💕</Text>
+              <Text style={styles.errorCode}>{error.message?.split(':')[0] || '3D-LOAD'}</Text>
             </View>
-          ) : <MascotViewer selected={selected} motionEnabled={motionEnabled} onError={setError} />}
+          ) : active && <MascotViewer key={viewerKey} selected={selected} motionEnabled={motionEnabled} onError={setError} />}
         </View>
+        <Pressable onPress={reload} accessibilityRole="button" style={styles.reload}>
+          <Text style={{ color: theme.accent, fontSize: 12 }}>Recarregar 3D</Text>
+        </Pressable>
 
         <View style={styles.choices}>
           {CHOICES.map((choice) => (
@@ -80,4 +93,6 @@ const styles = StyleSheet.create({
   careSubtitle: { fontSize: 12, marginTop: 4 },
   fallback: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   fallbackImage: { width: '100%', height: 320 }, fallbackText: { color: '#ffe2ef', fontSize: 12, textAlign: 'center', paddingHorizontal: 15 },
+  reload: { alignSelf: 'center', padding: 12, minHeight: 44, justifyContent: 'center' },
+  errorCode: { color: '#b9a9bd', fontSize: 10, marginTop: 4 },
 });

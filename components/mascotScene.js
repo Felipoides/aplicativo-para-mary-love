@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 // Both GLBs have full 3D backs, individual parts and colored materials.
-export function createMascotScene(width, height) {
+export function createMascotScene(width, height, { compatible = false } = {}) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#120e20');
   const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
@@ -22,6 +22,12 @@ export function createMascotScene(width, height) {
     model.position.y = -1.3;
     model.traverse((part) => {
       if (part.isMesh && part.material) {
+        if (compatible) {
+          // Native devices do not need the heavier PBR shader for these clay models.
+          const old = part.material;
+          part.material = new THREE.MeshLambertMaterial({ color: old.color });
+          old.dispose();
+        }
         part.material.side = THREE.DoubleSide;
         part.material.depthWrite = true;
       }
@@ -29,6 +35,14 @@ export function createMascotScene(width, height) {
     pivot.add(model);
     scene.add(pivot);
     models[name] = pivot;
+  };
+  const useSimpleMaterials = () => {
+    Object.values(models).forEach((pivot) => pivot.traverse((part) => {
+      if (!part.isMesh) return;
+      const old = part.material;
+      part.material = new THREE.MeshBasicMaterial({ color: old.color, side: THREE.DoubleSide });
+      old.dispose();
+    }));
   };
   const update = (selected, turn, seconds, motion = true) => {
     for (const [name, pivot] of Object.entries(models)) {
@@ -53,5 +67,5 @@ export function createMascotScene(width, height) {
       });
     }
   };
-  return { scene, camera, add, update, dispose };
+  return { scene, camera, add, update, dispose, useSimpleMaterials };
 }
