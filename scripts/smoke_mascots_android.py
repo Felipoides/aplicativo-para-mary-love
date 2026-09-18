@@ -22,7 +22,7 @@ def nodes():
     return ET.fromstring(xml).iter('node')
 
 try:
-    adb('install', '-r', sys.argv[1], timeout=120)
+    adb('install', '-r', '-g', sys.argv[1], timeout=120)
     # Keep the synthetic test device from registering with the live Firebase app.
     adb('shell', 'svc', 'wifi', 'disable')
     adb('shell', 'svc', 'data', 'disable')
