@@ -52,12 +52,15 @@ export default function MascotViewer({ selected, motionEnabled = true, onError }
         if (!cancelled) { setLoading(false); onError?.(error); }
       }
     };
-    const pointerDown = (event) => { host.dataset.dragX = String(event.clientX); };
-    const pointerMove = (event) => {
-      if (host.dataset.dragX) current.current.turn = Math.max(-0.34,
-        Math.min(0.34, (event.clientX - Number(host.dataset.dragX)) / 300));
+    const pointerDown = (event) => {
+      host.dataset.dragX = String(event.clientX);
+      host.dataset.dragTurn = String(current.current.turn);
     };
-    const pointerUp = () => { delete host.dataset.dragX; current.current.turn = 0; };
+    const pointerMove = (event) => {
+      if (host.dataset.dragX) current.current.turn = Number(host.dataset.dragTurn)
+        + (event.clientX - Number(host.dataset.dragX)) / 130;
+    };
+    const pointerUp = () => { delete host.dataset.dragX; delete host.dataset.dragTurn; };
     host.addEventListener('pointerdown', pointerDown);
     host.addEventListener('pointermove', pointerMove);
     host.addEventListener('pointerup', pointerUp);

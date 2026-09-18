@@ -1,17 +1,19 @@
 import * as THREE from 'three';
 
-// The current GLBs are relief prototypes. Keep turns shallow so their painted
-// fronts stay legible until the characters have complete sculpted backs.
+// Both GLBs have full 3D backs, individual parts and colored materials.
 export function createMascotScene(width, height) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#120e20');
   const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
   camera.position.set(0, 0.05, 6.4);
   camera.lookAt(0, 0, 0);
-  scene.add(new THREE.AmbientLight(0xffffff, 2.3));
-  const light = new THREE.DirectionalLight(0xffe4ee, 1.1);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.05));
+  const light = new THREE.DirectionalLight(0xffe4ee, 1.35);
   light.position.set(-2, 3, 5);
   scene.add(light);
+  const fill = new THREE.DirectionalLight(0xc9d2ff, 0.48);
+  fill.position.set(2, 1, -4);
+  scene.add(fill);
 
   const models = {};
   const add = (name, gltf) => {
@@ -21,7 +23,6 @@ export function createMascotScene(width, height) {
     model.traverse((part) => {
       if (part.isMesh && part.material) {
         part.material.side = THREE.DoubleSide;
-        // Preserve the source drawing's colors under the scene lighting.
         part.material.depthWrite = true;
       }
     });
@@ -35,7 +36,7 @@ export function createMascotScene(width, height) {
       pivot.visible = together || selected === name;
       pivot.position.x = together ? (name === 'matheus' ? -0.77 : 0.77) : 0;
       pivot.position.y = motion ? Math.sin(seconds * 1.6 + (name === 'mary' ? 1 : 0)) * 0.035 : 0;
-      pivot.rotation.y = Math.max(-0.34, Math.min(0.34, turn));
+      pivot.rotation.y = turn;
       pivot.scale.setScalar(together ? 0.93 : 1.13);
     }
   };

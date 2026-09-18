@@ -1,4 +1,4 @@
-"""Build editable 2.5D mascot prototypes from the approved front concept art."""
+"""Archive-only builder for the previous 2.5D relief prototypes."""
 from __future__ import annotations
 
 import json
@@ -11,7 +11,7 @@ from scipy import ndimage as ndi
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'assets/mascots/conceito-aprovado.png'
-OUTPUT = ROOT / 'assets/mascots'
+OUTPUT = ROOT / 'assets/mascots/legacy-relief'
 OUTPUT.mkdir(parents=True, exist_ok=True)
 
 
