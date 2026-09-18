@@ -15,6 +15,7 @@ import SurpriseScreen from './screens/SurpriseScreen';
 import DeveloperScreen from './screens/DeveloperScreen';
 import CreditsScreen from './screens/CreditsScreen';
 import AffectionScreen from './screens/AffectionScreen';
+import MascotsScreen from './screens/MascotsScreen';
 import ThemePickerModal from './components/ThemePickerModal';
 import InAppNotification from './components/InAppNotification';
 import MascotBubble from './components/MascotBubble';
@@ -237,6 +238,7 @@ function AppInner() {
   const [showGame, setShowGame] = useState(false);
   const [showDev, setShowDev] = useState(false);
   const [showMary, setShowMary] = useState(false);
+  const [showMascots, setShowMascots] = useState(false);
   const [devMode, setDevMode] = useState(false);
   const [showThemes, setShowThemes] = useState(false);
   const [specialMsg, setSpecialMsg] = useState(null);
@@ -288,6 +290,10 @@ function AppInner() {
       setSpecialMsg(null);
     });
   };
+
+  if (showMascots) {
+    return <><StatusBar style="light" /><MascotsScreen onBack={() => setShowMascots(false)} /></>;
+  }
 
   if (showGame) {
     return (
@@ -386,7 +392,7 @@ function AppInner() {
         </TouchableOpacity>
       )}
 
-      <MascotBubble activeScreen={activeTab} moodId={moodId} bottom={insets.bottom + 72} />
+      <MascotBubble activeScreen={activeTab} moodId={moodId} bottom={insets.bottom + 72} onOpenMascots={() => setShowMascots(true)} />
 
       <InAppNotification notification={inAppNotif} onDismiss={() => setInAppNotif(null)} />
     </View>

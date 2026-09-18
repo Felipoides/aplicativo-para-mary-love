@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MASCOT_SCREEN_LINES, MOODS } from '../constants/affection';
 import { useTheme } from '../utils/theme';
 import useAmbientMotion from '../utils/useAmbientMotion';
 
-export default function MascotBubble({ activeScreen, moodId, bottom = 82 }) {
+export default function MascotBubble({ activeScreen, moodId, bottom = 82, onOpenMascots }) {
   const { theme } = useTheme();
   const motionEnabled = useAmbientMotion();
   const bounce = useRef(new Animated.Value(0)).current;
@@ -53,18 +53,19 @@ export default function MascotBubble({ activeScreen, moodId, bottom = 82 }) {
           accessibilityLabel="Fechar fala do mascote"
         >
           <Text style={[styles.bubbleText, { color: theme.textDark }]}>{lines[lineIndex]}</Text>
+          <Text onPress={onOpenMascots} accessibilityRole="button" style={[styles.openText, { color: theme.accent }]}>Ver Matheus e Mary em 3D →</Text>
           <View style={[styles.tail, { backgroundColor: theme.cardBg }]} />
         </Pressable>
       )}
 
-      <Pressable onPress={interact} accessibilityRole="button" accessibilityLabel="Conversar com o mascote Mini Matheus">
+      <Pressable onPress={interact} onLongPress={onOpenMascots} accessibilityRole="button" accessibilityLabel="Conversar com o mascote Mini Matheus; segure para ver os dois em 3D">
         <Animated.View
           style={[
             styles.mascot,
             { backgroundColor: theme.cardBg, borderColor: `${theme.accent}36`, transform: [{ translateY: bounce }] },
           ]}
         >
-          <Text style={styles.mascotEmoji}>🧸</Text>
+          <Image source={require('../assets/mascots/Matheus-icone.png')} resizeMode="contain" style={styles.mascotImage} />
           <View style={[styles.heartBadge, { backgroundColor: theme.accent }]}>
             <Text style={styles.heart}>♥</Text>
           </View>
@@ -82,12 +83,13 @@ const styles = StyleSheet.create({
     shadowColor: '#3D1021', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.16, shadowRadius: 10, elevation: 8,
   },
   bubbleText: { fontSize: 12, lineHeight: 17, fontWeight: '650' },
+  openText: { fontSize: 11, fontWeight: '800', marginTop: 8 },
   tail: { position: 'absolute', right: 15, bottom: -5, width: 10, height: 10, transform: [{ rotate: '45deg' }] },
   mascot: {
     width: 64, height: 64, borderRadius: 24, borderWidth: 2, alignItems: 'center', justifyContent: 'center',
     shadowColor: '#3D1021', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 9,
   },
-  mascotEmoji: { fontSize: 40 },
+  mascotImage: { width: 58, height: 58 },
   heartBadge: { position: 'absolute', right: -2, top: -3, width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   heart: { color: '#FFFFFF', fontSize: 12, fontWeight: '900' },
 });
