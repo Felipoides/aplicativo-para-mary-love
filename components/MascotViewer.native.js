@@ -1,11 +1,28 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, PanResponder, View } from 'react-native';
 import { GLView } from 'expo-gl';
-import { Renderer, loadAsync } from 'expo-three';
+import { Renderer } from 'expo-three';
+import { Asset } from 'expo-asset';
+import { File } from 'expo-file-system';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { createMascotScene } from './mascotScene';
 
 const MATHEUS = require('../assets/mascots/Matheus.glb');
 const MARY = require('../assets/mascots/Maryane.glb');
+
+async function loadBundledModel(moduleId) {
+  // Read native bytes directly. FileLoader's fetch/Blob conversion can fail on
+  // Android with "The specified blob is invalid" even for a valid bundled GLB.
+  const asset = await Asset.fromModule(moduleId).downloadAsync();
+  if (!asset.localUri) throw new Error('3D-FILE: modelo não encontrado');
+  const buffer = await new File(asset.localUri).arrayBuffer();
+  const header = new DataView(buffer);
+  if (buffer.byteLength < 12 || header.getUint32(0, true) !== 0x46546c67 ||
+      header.getUint32(8, true) !== buffer.byteLength) {
+    throw new Error('3D-FILE: modelo incompleto');
+  }
+  return new GLTFLoader().parseAsync(buffer, '');
+}
 
 function release(run) {
   if (!run || run.cancelled) return;
@@ -41,7 +58,7 @@ export default function MascotViewer({ selected, motionEnabled = true, onError }
     if (!mounted.current) return;
     clearTimeout(watchdog.current);
     release(session.current);
-    console.warn('Mascot3D:', error.message);
+    console.warn(`Mascot3D: ${error.message}`);
     setLoading(false);
     live.current.onError?.(error);
   };
@@ -76,7 +93,7 @@ export default function MascotViewer({ selected, motionEnabled = true, onError }
       renderer.debug.onShaderError = () => { throw new Error('3D-SHADER: material incompatível'); };
       const world = createMascotScene(gl.drawingBufferWidth, gl.drawingBufferHeight, { compatible: true });
       run.world = world;
-      const [matheus, mary] = await Promise.all([loadAsync(MATHEUS), loadAsync(MARY)]);
+      const [matheus, mary] = await Promise.all([loadBundledModel(MATHEUS), loadBundledModel(MARY)]);
       if (run.cancelled) {
         // A slow load may finish after the user leaves the screen.
         const abandoned = createMascotScene(1, 1);
@@ -115,7 +132,7 @@ export default function MascotViewer({ selected, motionEnabled = true, onError }
           gl.endFrameEXP();
         } catch (error) {
           if (!simple) {
-            console.warn('Mascot3D: retry with simple materials', error.message);
+            console.warn(`Mascot3D: retry with simple materials: ${error.message}`);
             world.useSimpleMaterials();
             simple = true;
             frames = 0;
