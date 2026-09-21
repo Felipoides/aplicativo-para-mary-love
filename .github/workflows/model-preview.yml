@@ -16,12 +16,6 @@ jobs:
         run: |
           curl -fL https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz -o /tmp/blender.tar.xz
           tar -xf /tmp/blender.tar.xz -C /tmp
-      - uses: actions/upload-artifact@v4
-        with:
-          name: blender-runtime
-          path: /tmp/blender.tar.xz
-          compression-level: 0
-          retention-days: 2
       - name: Model and render
         run: /tmp/blender-4.5.3-linux-x64/blender -b -t 4 --python modeling/create_study.py
       - uses: actions/upload-artifact@v4

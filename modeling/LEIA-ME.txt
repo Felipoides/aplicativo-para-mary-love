@@ -1,0 +1,37 @@
+MATHEUS E MARY — ESTUDO 3D EDITÁVEL
+
+Abra Matheus-e-Mary-editavel.blend no Blender 4.5 ou mais recente.
+Os personagens também são fornecidos separadamente em Matheus.glb e Mary.glb.
+
+Esta é uma nova aproximação tridimensional da referência fornecida, feita
+para edição. As laterais e costas são interpretações: não havia desenhos
+desses ângulos. As imagens de prévia são renderizações dos modelos reais.
+
+COMO EDITAR
+- As coleções Matheus e Mary contêm as peças de cada personagem.
+- Matheus_CONTROLE e Mary_CONTROLE movem o personagem inteiro.
+- Cabeca_PIVO move o rosto, óculos, orelhas e cabelo juntos.
+- Selecione uma peça e use Tab para editar sua malha.
+- Os modificadores Suavizacao_editavel dos rostos e roupas podem ser
+  reduzidos ou desativados enquanto você ajusta os vértices.
+- Os cachos são malhas separadas e nomeadas. Você pode mover, duplicar,
+  excluir e esculpir mechas individualmente.
+- O material Jeans_azul_alternativo_Mary está disponível para substituir
+  Jeans_claro_Mary. A versão inicial segue a calça clara da imagem anexada.
+- A coleção Referencia_2D inclui a imagem original empacotada no .blend.
+  Ative sua visibilidade no Outliner para consultar.
+- As câmeras e luzes ficam na coleção Estudio_cameras_luzes.
+
+LIMITES DESTA BASE
+- Não possui rig/esqueleto nem pesos de animação.
+- As peças são separadas. Não é uma malha única retopologizada para animar.
+- É um arquivo para refino artístico; não foi otimizado para o APK.
+- Antes de usar no aplicativo, reduza a geometria, prepare o rig e confira
+  as texturas e materiais no renderizador do celular.
+- A geometria é totalmente volumétrica, incluindo costas e laterais.
+
+RECONSTRUÇÃO
+O script create_study.py reproduz a cena com Blender:
+blender -b --python create_study.py -- /caminho/para/saida
+Mantenha referencia.png na mesma pasta do script para incorporá-la à cena.
+A reconstrução cria uma cena nova: execute em uma instância separada.
